@@ -1,29 +1,26 @@
-/**
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
+document.addEventListener('DOMContentLoaded', () => {
 
-        http://www.apache.org/licenses/LICENSE-2.0
+  // ----- Nav menu: highlight the clicked link -----
+  const navLinks = document.querySelectorAll('nav a');
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      navLinks.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+    });
+  });
 
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
-*/
+  // ----- Profile picture placeholder -----
+  // If "profile-photo.jpg" isn't found next to this HTML file (i.e. you
+  // haven't added your photo yet), show a placeholder icon instead of a
+  // broken image.
+  const avatarWrap = document.getElementById('avatarWrap');
+  const profileImg = document.getElementById('profileImg');
 
-// Wait for the deviceready event before using any of Cordova's device APIs.
-// See https://cordova.apache.org/docs/en/latest/cordova/events/events.html#deviceready
-document.addEventListener('deviceready', onDeviceReady, false);
+  if (profileImg && avatarWrap) {
+    profileImg.addEventListener('error', () => {
+      profileImg.style.display = 'none';
+      avatarWrap.classList.add('no-photo');
+    });
+  }
 
-function onDeviceReady() {
-    // Cordova is now initialized. Have fun!
-
-    console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
-    document.getElementById('deviceready').classList.add('ready');
-}
+});
