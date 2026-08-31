@@ -9,5 +9,5 @@
 <br>
 
 ## Mobile Phone view:
-<img width="450" height="1024" alt="674c6b95-5603-4536-bf41-43176c7b3273" src="https://github.com/user-attachments/assets/ec9998be-3a22-4d9b-98b6-f8fc6be91782" />                 <img width="450" height="1024" alt="61ea4495-2e65-4e47-becd-fcd89ef9de97" src="https://github.com/user-attachments/assets/46d490ec-cafa-49b9-9f67-1ef66a25a0d8" />
+<img width="250" height="524" alt="674c6b95-5603-4536-bf41-43176c7b3273" src="https://github.com/user-attachments/assets/ec9998be-3a22-4d9b-98b6-f8fc6be91782" />                 <img width="250" height="524" alt="61ea4495-2e65-4e47-becd-fcd89ef9de97" src="https://github.com/user-attachments/assets/46d490ec-cafa-49b9-9f67-1ef66a25a0d8" />
 
