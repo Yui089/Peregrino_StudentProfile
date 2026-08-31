@@ -325,6 +325,14 @@ h1{
   justify-content:space-between;
   gap:12px;
   margin-bottom:8px;
+  flex-wrap:wrap;
+}
+
+.project-links{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  flex-shrink:0;
 }
 
 .project h3{
