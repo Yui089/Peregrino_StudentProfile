@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yana — Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/index.css">
+</head>
+<body>
+
+<div class="page">
+
+  <div class="cover"></div>
+
+  <div class="header-row">
+    <div class="avatar-frame">
+      <div class="avatar-inner" id="avatarWrap">
+        <img src="../../img/pfp2.jpg" alt="Yana's profile photo" id="profileImg">
+        <div class="avatar-fallback">
+          <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6">
+            <circle cx="12" cy="8" r="4"></circle>
+            <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
+          </svg>
+          <span>Add Photo</span>
+        </div>
+      </div>
+    </div>
+    <div class="identity">
+      <div class="eyebrow">Student Profile</div>
+      <h1>Haiana Peregrino</h1>
+      <div class="subtitle">Information Technology Student · Xavier University — Ateneo de Cagayan</div>
+    </div>
+  </div>
+
+  <nav class="tabbar">
+    <a href="../Homepage/Index.html" class="active">Profile</a>
+    <a href="../About/About.html">About</a>
+    <a href="../Skills/Skills.html">Skills</a>
+    <a href="../Projects/Projects.html">Projects</a>
+    <a href="../Contacts/Contacts.html">Contact</a>
+  </nav>
+
+  <div class="body-grid">
+
+    <section class="card">
+      <p class="tagline">"He who plants a tree plants hope."</p>
+      <p class="hero-greet">Hi, I'm Yana.</p>
+      <p>Welcome to my little corner of the internet, where school projects, experiments, and ideas come together. Take a look around to see what I've learned, what I've built, and where I'm headed next.</p>
+      <p>My time in IT has taken me through more than just programming. I've explored web development, databases, networking, and mobile applications, each giving me a different perspective on what technology can do. Some projects have been smooth, while others have involved a lot of "why isn't this working?" moments.</p>
+      <p>This website brings those pieces together. You'll find a little bit of my work, the skills I'm developing, and the direction I'm exploring as I continue building my place in the world of IT.</p>
+      <a class="cta-btn" href="../Projects/Projects.html">Explore My Work →</a>
+    </section>
+
+    <section class="card">
+      <div class="section-label"><div class="tick"></div><h2>Currently Exploring</h2></div>
+      <div class="interest-grid">
+        <div class="interest-chip"><span class="chip-icon">🌐</span><span class="chip-label">Web Development</span></div>
+        <div class="interest-chip"><span class="chip-icon">🗄️</span><span class="chip-label">Databases</span></div>
+        <div class="interest-chip"><span class="chip-icon">📊</span><span class="chip-label">Data Analytics</span></div>
+        <div class="interest-chip"><span class="chip-icon">📱</span><span class="chip-label">Mobile Development</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-label"><div class="tick"></div><h2>Featured Work</h2></div>
+      <div class="featured-grid">
+        <div class="feature-card">
+          <h3>Ember's Flight</h3>
+          <p>A Flappy Bird-inspired browser game built for Web Development, with sprite animation and a scoring system.</p>
+          <a class="gh-link" href="../Projects/Projects.html">View Project</a>
+        </div>
+        <div class="feature-card">
+          <h3>Pharmacy Inventory System</h3>
+          <p>A desktop UI for managing pharmacy stock, built with Qt Designer and a MySQL backend.</p>
+          <a class="gh-link" href="../Projects/Projects.html">View Project</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMMUNITY INVOLVEMENT — swap the placeholder image paths below with your
+         own photos. Add the image files to the shared "img" folder and update
+         the "src" paths to match your file names. -->
+    <section class="card">
+      <div class="section-label"><div class="tick"></div><h2>Community Involvement</h2></div>
+      <p>Beyond coursework, I stay involved in a couple of student organizations on campus.</p>
+      <div class="org-list">
+
+        <article class="org">
+          <h3>Ateneo Red Cross Youth (ARCY)</h3>
+          <p>A member of the Ateneo Red Cross Youth, taking part in campus outreach and volunteer initiatives that support first aid awareness and community service.</p>
+          <div class="org-gallery">
+            <img src="../../img/arcy1.jpg" alt="ARCY activity photo 1">
+            <img src="../../img/arcy2.jpg" alt="ARCY activity photo 2">
+            <img src="../../img/arcy3.jpg" alt="ARCY activity photo 3">
+          </div>
+        </article>
+
+        <article class="org">
+          <h3>Xavier Circle of Information Technology Students (XCITeS)</h3>
+          <p>Treasurer for XCITeS, our student organization for computer enthusiasts, handling budgeting and liquidation reports for the org's projects and events.</p>
+          <div class="org-gallery">
+            <img src="../../img/org1.jpg" alt="XCITeS activity photo 1">
+            <img src="../../img/org2.jpg" alt="XCITeS activity photo 2">
+            <img src="../../img/org3.jpg" alt="XCITeS activity photo 3">
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-label"><div class="tick"></div><h2>A Little More...</h2></div>
+      <p>When I'm not studying IT, I like to paint and spend time with my cats.</p>
+      <a class="cta-btn" href="../About/About.html">Get to know me →</a>
+    </section>
+
+  </div>
+
+  <footer>
+    <div class="divider"></div>
+    <p>© 2026 Yana<br>All rights reserved</p>
+  </footer>
+
+</div>
+
+<script src="../../js/index.js"></script>
+</body>
+</html>
