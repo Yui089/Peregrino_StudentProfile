@@ -1,97 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yana — Contact</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../css/index.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yana — Contact</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/index.css">
 </head>
 <body>
 
 <div class="page">
 
-  <div class="cover"></div>
+    <div class="cover"></div>
 
-  <div class="header-row">
-    <div class="avatar-frame">
-      <div class="avatar-inner" id="avatarWrap">
-        <img src="../../img/pfp2.jpg" alt="Yana's profile photo" id="profileImg">
-        <div class="avatar-fallback">
-          <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6">
-            <circle cx="12" cy="8" r="4"></circle>
-            <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
-          </svg>
-          <span>Add Photo</span>
+    <div class="header-row">
+        <div class="avatar-frame">
+            <div class="avatar-inner" id="avatarWrap">
+                <img src="../../img/pfp2.jpg" alt="Yana's profile photo" id="profileImg">
+                <div class="avatar-fallback">
+                    <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6">
+                        <circle cx="12" cy="8" r="4"></circle>
+                        <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
+                    </svg>
+                    <span>Add Photo</span>
+                </div>
+            </div>
         </div>
-      </div>
+        <div class="identity">
+            <div class="eyebrow">Student Profile</div>
+            <h1 id="profileName">Haiana Peregrino</h1>
+
+            <div class="subtitle" id="profileCourseYear">
+                Information Technology Student · Xavier University — Ateneo de Cagayan
+            </div>
+            <a href="../Homepage/Index.html#editProfileSection" class="edit-profile-btn">
+                Edit Profile
+            </a>
+        </div>
     </div>
-    <div class="identity">
-      <div class="eyebrow">Student Profile</div>
-      <h1>Haiana Peregrino</h1>
-      <div class="subtitle">Information Technology Student · Xavier University — Ateneo de Cagayan</div>
+
+    <nav class="tabbar">
+        <a href="../Homepage/Index.html">Profile</a>
+        <a href="../About/About.html">About</a>
+        <a href="../Skills/Skills.html">Skills</a>
+        <a href="../Projects/Projects.html">Projects</a>
+        <a href="../Contacts/Contacts.html" class="active">Contact</a>
+    </nav>
+
+    <div class="body-grid">
+
+        <!-- CONTACT — replace the placeholder email, GitHub, and social links below with your own. -->
+        <section class="card">
+            <div class="section-label"><div class="tick"></div><h2>Contact</h2></div>
+            <p>Feel free to reach out through any of the channels below.</p>
+
+            <div class="contact-list">
+                <a class="contact-item" href="mailto:your-email@example.com">
+                    <div class="dial-mark"></div>
+                    <div class="contact-text">
+                        <span class="k">Email</span>
+                        <span class="v">haianaperegrino089@gmail.com</span>
+                    </div>
+                </a>
+                <a class="contact-item" href="https://github.com/Yui089" target="_blank" rel="noopener">
+                    <div class="dial-mark"></div>
+                    <div class="contact-text">
+                        <span class="k">GitHub</span>
+                        <span class="v">github.com/Yui089</span>
+                    </div>
+                </a>
+                <a class="contact-item" href="https://linkedin.com/in/your-profile" target="_blank" rel="noopener">
+                    <div class="dial-mark"></div>
+                    <div class="contact-text">
+                        <span class="k">LinkedIn</span>
+                        <span class="v">linkedin.com/in/your-profile</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="contact-form">
+                <p class="form-note">This form is for display purposes only and is not yet connected to send messages.</p>
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="Your name">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" rows="4" placeholder="Write your message here"></textarea>
+                <button type="button" disabled>Send Message</button>
+            </div>
+
+        </section>
+
     </div>
-  </div>
 
-  <nav class="tabbar">
-    <a href="../Homepage/Index.html">Profile</a>
-    <a href="../About/About.html">About</a>
-    <a href="../Skills/Skills.html">Skills</a>
-    <a href="../Projects/Projects.html">Projects</a>
-    <a href="../Contacts/Contacts.html" class="active">Contact</a>
-  </nav>
-
-  <div class="body-grid">
-
-    <!-- CONTACT — replace the placeholder email, GitHub, and social links below with your own. -->
-    <section class="card">
-      <div class="section-label"><div class="tick"></div><h2>Contact</h2></div>
-      <p>Feel free to reach out through any of the channels below.</p>
-
-      <div class="contact-list">
-        <a class="contact-item" href="mailto:your-email@example.com">
-          <div class="dial-mark"></div>
-          <div class="contact-text">
-            <span class="k">Email</span>
-            <span class="v">haianaperegrino089@gmail.com</span>
-          </div>
-        </a>
-        <a class="contact-item" href="https://github.com/Yui089" target="_blank" rel="noopener">
-          <div class="dial-mark"></div>
-          <div class="contact-text">
-            <span class="k">GitHub</span>
-            <span class="v">github.com/Yui089</span>
-          </div>
-        </a>
-        <a class="contact-item" href="https://linkedin.com/in/your-profile" target="_blank" rel="noopener">
-          <div class="dial-mark"></div>
-          <div class="contact-text">
-            <span class="k">LinkedIn</span>
-            <span class="v">linkedin.com/in/your-profile</span>
-          </div>
-        </a>
-      </div>
-
-      <div class="contact-form">
-        <p class="form-note">This form is for display purposes only and is not yet connected to send messages.</p>
-        <label for="name">Name</label>
-        <input type="text" id="name" name="name" placeholder="Your name">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="you@example.com">
-        <label for="message">Message</label>
-        <textarea id="message" name="message" rows="4" placeholder="Write your message here"></textarea>
-        <button type="button" disabled>Send Message</button>
-      </div>
-
-    </section>
-
-  </div>
-
-  <footer>
-    <div class="divider"></div>
-    <p>© 2026 Yana<br>All rights reserved</p>
-  </footer>
+    <footer>
+        <div class="divider"></div>
+        <p>© 2026 Yana<br>All rights reserved</p>
+    </footer>
 
 </div>
 
