@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yana — About</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../css/index.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yana — About</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/index.css">
 </head>
 <body>
 
@@ -14,6 +14,7 @@
 
   <div class="cover"></div>
 
+  <!-- HEADER -->
   <div class="header-row">
     <div class="avatar-frame">
       <div class="avatar-inner" id="avatarWrap">
@@ -30,16 +31,16 @@
     <div class="identity">
       <div class="eyebrow">Student Profile</div>
       <h1 id="profileName">Haiana Peregrino</h1>
-
       <div class="subtitle" id="profileCourseYear">
         Information Technology Student · Xavier University — Ateneo de Cagayan
       </div>
       <a href="../Homepage/Index.html#editProfileSection" class="edit-profile-btn">
         Edit Profile
       </a>
-        </div>
+    </div>
   </div>
 
+  <!-- NAVIGATION TABBAR -->
   <nav class="tabbar">
     <a href="../Homepage/Index.html">Profile</a>
     <a href="../About/About.html" class="active">About</a>
@@ -48,44 +49,35 @@
     <a href="../Contacts/Contacts.html">Contact</a>
   </nav>
 
+  <!-- BODY GRID CONTAINING ABOUT DATA -->
   <div class="body-grid">
-
-    <section class="card">
-      <div class="section-label"><div class="tick"></div><h2>About Me</h2></div>
-
-      <p>A student of Information Technology whose interest in the field developed from a curiosity about how technology functions and how it can be applied to solve everyday problems. Throughout my academic program, I have been introduced to several areas of study, including web development, database management, networking, programming, and mobile application development. Each project undertaken during this period has provided an opportunity to acquire new knowledge, even when the process proved difficult.</p>
-      <p>My studies have shown me that technology extends beyond the writing of code. It requires an understanding of the underlying problem, the organization of information, the design of solutions that are genuinely usable, and the willingness to persist when something does not function as intended. I have not yet settled on a specific area of specialization within Information Technology, though I hold a particular interest in web development, database systems, and the design of practical solutions that simplify everyday tasks. For me, studying Information Technology represents an ongoing process of learning and the gradual development of confidence through experience.</p>
-
-      <div class="info-block">
-        <div class="info-label">My Interests</div>
-        <p><strong>Web Development</strong> — Working with HTML, CSS, and JavaScript to construct organized and responsive interfaces.</p>
-        <p><strong>Databases</strong> — Studying MySQL and the methods by which information is stored, organized, and retrieved.</p>
-        <p><strong>User Interface and Design</strong> — Attention to layout, spacing, consistency, and the overall experience of the user.</p>
-        <p><strong>Networking</strong> — A developing understanding of how devices and networks communicate, which has clarified the infrastructure supporting the applications in common use.</p>
-        <p><strong>Learning Through Projects</strong> — A preference for acquiring knowledge through practical construction and the examination of how individual components function together.</p>
+    <section id="about" class="card">
+      <div class="section-label">
+        <div class="tick"></div>
+        <h2>About Me</h2>
       </div>
 
+      <!-- ABOUT ME -->
+      <p class="intro-text" id="profileAbout"></p>
+
+      <!-- INTERESTS -->
+      <div class="info-block">
+        <div class="info-label">Interests</div>
+        <p class="intro-text" id="profileInterests"></p>
+      </div>
+
+      <!-- EDUCATIONAL BACKGROUND -->
       <div class="info-block">
         <div class="info-label">Educational Background</div>
-        <div class="edu-item">
-          <p class="edu-title">Bachelor of Science in Information Technology</p>
-          <p class="edu-detail">Currently Pursuing</p>
-          <p>A candidate for the degree of Bachelor of Science in Information Technology, with coursework encompassing programming, database management, networking, web development, mobile applications, and related areas of the discipline.</p>
-        </div>
-        <div class="edu-item">
-          <p class="edu-title">Senior High School</p>
-          <p class="edu-detail">Xavier University — Ateneo de Cagayan · 2022–2024</p>
-          <p>Completed a period of work immersion at A Brown Company Inc.</p>
-        </div>
+        <p class="intro-text" id="profileEducation"></p>
       </div>
 
+      <!-- GOALS & ASPIRATIONS -->
       <div class="info-block">
-        <div class="info-label">Goals &amp; Aspirations</div>
-        <p>A professional objective of pursuing a career as a Data Analyst.</p>
+        <div class="info-label">Goals & Aspirations</div>
+        <p class="intro-text" id="profileGoals"></p>
       </div>
-
     </section>
-
   </div>
 
   <footer>
@@ -95,6 +87,7 @@
 
 </div>
 
+<!-- SCRIPT IMPORT -->
 <script src="../../js/index.js"></script>
 </body>
 </html>

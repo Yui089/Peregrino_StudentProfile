@@ -1,515 +1,606 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yana — Profile</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yana — Profile</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="../../css/index.css">
+<link rel="stylesheet" href="../../css/index.css">
 </head>
 
 <body>
 
 <div class="page">
 
-    <div class="cover"></div>
+  <div class="cover"></div>
 
-    <!-- PROFILE HEADER -->
+  <!-- =========================
+       PROFILE HEADER
+  ========================== -->
 
-    <div class="header-row">
+  <div class="header-row">
 
-        <div class="avatar-frame">
-            <div class="avatar-inner" id="avatarWrap">
+    <div class="avatar-frame">
+      <div class="avatar-inner" id="avatarWrap">
 
-                <img
-                        src="../../img/pfp2.jpg"
-                        alt="Yana's profile photo"
-                        id="profileImg"
-                >
+        <img
+          src="../../img/pfp2.jpg"
+          alt="Yana's profile photo"
+          id="profileImg"
+        >
 
-                <div class="avatar-fallback">
-                    <svg viewBox="0 0 24 24" width="34" height="34"
-                         fill="none" stroke="currentColor" stroke-width="1.6">
-                        <circle cx="12" cy="8" r="4"></circle>
-                        <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
-                    </svg>
+        <div class="avatar-fallback">
+          <svg viewBox="0 0 24 24" width="34" height="34"
+               fill="none" stroke="currentColor" stroke-width="1.6">
+            <circle cx="12" cy="8" r="4"></circle>
+            <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
+          </svg>
 
-                    <span>Add Photo</span>
-                </div>
-
-            </div>
+          <span>Add Photo</span>
         </div>
 
-
-        <div class="identity">
-
-            <div class="eyebrow">Student Profile</div>
-
-            <!-- This is now dynamically updated -->
-            <h1 id="profileName">Haiana Peregrino</h1>
-
-            <!-- This is now dynamically updated -->
-            <div class="subtitle" id="profileCourseYear">
-                Information Technology Student · Xavier University — Ateneo de Cagayan
-            </div>
-
-            <!-- EDIT PROFILE BUTTON -->
-            <button
-                    type="button"
-                    id="editProfileBtn"
-                    class="edit-profile-btn"
-            >
-                Edit Profile
-            </button>
-
-        </div>
-
+      </div>
     </div>
 
 
-    <!-- NAVIGATION -->
+    <div class="identity">
 
-    <nav class="tabbar">
+      <div class="eyebrow">Student Profile</div>
 
-        <a href="../Homepage/Index.html" class="active">
-            Profile
-        </a>
+      <h1 id="profileName">Haiana Peregrino</h1>
 
-        <a href="../About/About.html">
-            About
-        </a>
+      <div class="subtitle" id="profileCourseYear">
+        Information Technology Student · Xavier University — Ateneo de Cagayan
+      </div>
 
-        <a href="../Skills/Skills.html">
-            Skills
-        </a>
+      <button
+        type="button"
+        id="editProfileBtn"
+        class="edit-profile-btn"
+      >
+        Edit Profile
+      </button>
 
-        <a href="../Projects/Projects.html">
-            Projects
-        </a>
+    </div>
 
-        <a href="../Contacts/Contacts.html">
-            Contact
-        </a>
-
-    </nav>
+  </div>
 
 
-    <!-- EDIT PROFILE FORM
-         Hidden until the Edit Profile button is clicked -->
+  <!-- =========================
+       NAVIGATION
+  ========================== -->
 
-    <section
-            id="editProfileSection"
-            class="card edit-profile-card"
-            hidden
-    >
+  <nav class="tabbar">
 
-        <div class="section-label">
-            <div class="tick"></div>
-            <h2>Edit Profile</h2>
-        </div>
+    <a href="../Homepage/Index.html" class="active">
+      Profile
+    </a>
 
+    <a href="../About/About.html">
+      About
+    </a>
 
-        <p class="edit-profile-intro">
-            Update your profile information below. Your saved information
-            will remain available when you reopen the application.
-        </p>
+    <a href="../Skills/Skills.html">
+      Skills
+    </a>
 
+    <a href="../Projects/Projects.html">
+      Projects
+    </a>
 
-        <form id="editProfileForm" class="edit-profile-form">
+    <a href="../Contacts/Contacts.html">
+      Contact
+    </a>
 
-            <!-- TAGLINE / INTRODUCTION -->
-
-            <div class="form-group">
-                <label for="editIntro">Introduction</label>
-                <textarea id="editIntro" name="intro" rows="10" placeholder="Write your introduction here..."></textarea>
-                <small class="skills-help">Leave a blank line between paragraphs.</small>
-            </div>
-
-            <!-- FULL NAME -->
-
-            <div class="form-group">
-
-                <label for="editFullName">
-                    Full Name
-                </label>
-
-                <input
-                        type="text"
-                        id="editFullName"
-                        name="fullName"
-                        placeholder="Enter your full name"
-                >
-
-            </div>
+  </nav>
 
 
-            <!-- COURSE -->
+  <!-- =====================================================
+       EDIT PROFILE FORM
+       Hidden until the Edit Profile button is clicked
+  ====================================================== -->
 
-            <div class="form-group">
+  <section
+    id="editProfileSection"
+    class="card edit-profile-card"
+    hidden
+  >
 
-                <label for="editCourse">
-                    Course
-                </label>
-
-                <input
-                        type="text"
-                        id="editCourse"
-                        name="course"
-                        placeholder="e.g. BS Information Technology"
-                >
-
-            </div>
-
-
-            <!-- YEAR LEVEL -->
-
-            <div class="form-group">
-
-                <label for="editYearLevel">
-                    Year Level
-                </label>
-
-                <input
-                        type="text"
-                        id="editYearLevel"
-                        name="yearLevel"
-                        placeholder="e.g. 3rd Year"
-                >
-
-            </div>
+    <div class="section-label">
+      <div class="tick"></div>
+      <h2>Edit Profile</h2>
+    </div>
 
 
-            <!-- ABOUT ME -->
-
-            <div class="form-group">
-
-                <label for="editAbout">
-                    About Me
-                </label>
-
-                <textarea
-                        id="editAbout"
-                        name="about"
-                        rows="6"
-                        placeholder="Tell something about yourself..."
-                ></textarea>
-
-            </div>
+    <p class="edit-profile-intro">
+      Update your profile information below. Your saved information
+      will remain available when you reopen the application.
+    </p>
 
 
-            <!-- SKILLS -->
+    <form id="editProfileForm" class="edit-profile-form">
 
-            <div class="form-group">
+      <!-- INTRODUCTION -->
 
-                <label for="editSkills">
-                    Skills
-                </label>
+      <div class="form-group">
 
-                <input
-                        type="text"
-                        id="editSkills"
-                        name="skills"
-                        placeholder="e.g. SQL, Web Development, Data Analysis"
-                >
+        <label for="editIntro">
+          Introduction
+        </label>
 
-                <small class="skills-help">
-                    Separate multiple skills with commas.
-                </small>
+        <textarea
+          id="editIntro"
+          name="intro"
+          rows="10"
+          placeholder="Write your introduction here..."
+        ></textarea>
 
-            </div>
+        <small class="skills-help">
+          Leave a blank line between paragraphs.
+        </small>
 
-
-            <!-- VALIDATION / STATUS MESSAGE -->
-
-            <p
-                    id="editProfileMessage"
-                    class="form-message"
-                    aria-live="polite"
-            ></p>
+      </div>
 
 
-            <!-- BUTTONS -->
+      <!-- FULL NAME -->
 
-            <div class="edit-form-actions">
+      <div class="form-group">
 
-                <button
-                        type="button"
-                        id="cancelEditBtn"
-                        class="edit-cancel-btn"
-                >
-                    Cancel
-                </button>
+        <label for="editFullName">
+          Full Name
+        </label>
 
-                <button
-                        type="submit"
-                        class="edit-save-btn"
-                >
-                    Save Changes
-                </button>
+        <input
+          type="text"
+          id="editFullName"
+          name="fullName"
+          placeholder="Enter your full name"
+        >
 
-            </div>
+      </div>
 
-        </form>
+
+      <!-- COURSE -->
+
+      <div class="form-group">
+
+        <label for="editCourse">
+          Course
+        </label>
+
+        <input
+          type="text"
+          id="editCourse"
+          name="course"
+          placeholder="e.g. BS Information Technology"
+        >
+
+      </div>
+
+
+      <!-- YEAR LEVEL -->
+
+      <div class="form-group">
+
+        <label for="editYearLevel">
+          Year Level
+        </label>
+
+        <input
+          type="text"
+          id="editYearLevel"
+          name="yearLevel"
+          placeholder="e.g. 3rd Year"
+        >
+
+      </div>
+
+
+      <!-- ABOUT ME -->
+
+      <div class="form-group">
+
+        <label for="editAbout">
+          About Me
+        </label>
+
+        <textarea
+          id="editAbout"
+          name="about"
+          rows="6"
+          placeholder="Tell something about yourself..."
+        ></textarea>
+
+        <small class="skills-help">
+          This appears on both your Profile and About pages.
+        </small>
+
+      </div>
+
+
+      <!-- INTERESTS -->
+
+      <div class="form-group">
+
+        <label for="editInterests">
+          My Interests
+        </label>
+
+        <textarea
+          id="editInterests"
+          name="interests"
+          rows="6"
+          placeholder="List your interests..."
+        ></textarea>
+
+        <small class="skills-help">
+          Leave a blank line between each interest.
+        </small>
+
+      </div>
+
+
+      <!-- EDUCATIONAL BACKGROUND -->
+
+      <div class="form-group">
+
+        <label for="editEducation">
+          Educational Background
+        </label>
+
+        <textarea
+          id="editEducation"
+          name="education"
+          rows="6"
+          placeholder="List your educational background..."
+        ></textarea>
+
+        <small class="skills-help">
+          Leave a blank line between each entry.
+        </small>
+
+      </div>
+
+
+      <!-- GOALS & ASPIRATIONS -->
+
+      <div class="form-group">
+
+        <label for="editGoals">
+          Goals &amp; Aspirations
+        </label>
+
+        <textarea
+          id="editGoals"
+          name="goals"
+          rows="4"
+          placeholder="Describe your goals and aspirations..."
+        ></textarea>
+
+      </div>
+
+
+      <!-- SKILLS (with star ratings) -->
+
+      <div class="form-group">
+
+        <label>
+          Skills
+        </label>
+
+        <!-- JavaScript builds one row per skill here -->
+        <div id="skillsEditor" class="skills-editor"></div>
+
+        <button
+          type="button"
+          id="addSkillBtn"
+          class="add-skill-btn"
+        >
+          + Add Skill
+        </button>
+
+        <small class="skills-help">
+          Click the stars to rate how skilled you are, from 1 (lowest)
+          to 5 (highest).
+        </small>
+
+      </div>
+
+
+      <!-- VALIDATION / STATUS MESSAGE -->
+
+      <p
+        id="editProfileMessage"
+        class="form-message"
+        aria-live="polite"
+      ></p>
+
+
+      <!-- BUTTONS -->
+
+      <div class="edit-form-actions">
+
+        <button
+          type="button"
+          id="cancelEditBtn"
+          class="edit-cancel-btn"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="edit-save-btn"
+        >
+          Save Changes
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+
+  <!-- =========================
+       PROFILE CONTENT
+  ========================== -->
+
+  <div class="body-grid">
+
+
+    <!-- INTRODUCTION -->
+
+    <section class="card">
+
+      <p class="intro-text" id="profileIntro">"He who plants a tree plants hope."
+
+Welcome to my little corner of the internet, where school projects, experiments, and ideas come together. Take a look around to see what I've learned, what I've built, and where I'm headed next.
+
+My time in IT has taken me through more than just programming. I've explored web development, databases, networking, and mobile applications, each giving me a different perspective on what technology can do. Some projects have been smooth, while others have involved a lot of "why isn't this working?" moments.
+
+This website brings those pieces together. You'll find a little bit of my work, the skills I'm developing, and the direction I'm exploring as I continue building my place in the world of IT.</p>
+
+      <a
+        class="cta-btn"
+        href="../Projects/Projects.html"
+      >
+        Explore My Work →
+      </a>
 
     </section>
 
 
-    <!-- PROFILE CONTENT -->
+    <!-- =========================
+         ABOUT ME
+    ========================== -->
 
-    <div class="body-grid">
+    <section class="card">
+
+      <div class="section-label">
+        <div class="tick"></div>
+        <h2>About Me</h2>
+      </div>
+
+      <!-- Dynamically updated from localStorage -->
+      <p class="intro-text" id="profileAbout">
+        I am a student of Information Technology whose interest in the
+        field developed from a curiosity about how technology functions
+        and how it can be applied to solve everyday problems.
+      </p>
+
+    </section>
 
 
-        <!-- INTRODUCTION -->
+    <!-- =========================
+         SKILLS SNAPSHOT
+    ========================== -->
 
-        <section class="card">
+    <section class="card">
 
-            <p class="intro-text" id="profileIntro">"He who plants a tree plants hope."
+      <div class="section-label">
+        <div class="tick"></div>
+        <h2>My Skills</h2>
+      </div>
 
-                Welcome to my little corner of the internet, where school
-                projects, experiments, and ideas come together. Take a look
-                around to see what I've learned, what I've built, and where
-                I'm headed next.
+      <!-- JavaScript creates the skill tags here -->
+      <div
+        id="profileSkills"
+        class="tag-row profile-skills"
+      ></div>
 
-                My time in IT has taken me through more than just programming.
-                I've explored web development, databases, networking, and
-                mobile applications, each giving me a different perspective
-                on what technology can do. Some projects have been smooth,
-                while others have involved a lot of "why isn't this working?"
-                moments.
+    </section>
 
-                This website brings those pieces together. You'll find a little
-                bit of my work, the skills I'm developing, and the direction
-                I'm exploring as I continue building my place in the world of IT.
-            </p>
 
-            <a
-                    class="cta-btn"
-                    href="../Projects/Projects.html"
+    <!-- =========================
+         FEATURED WORK
+    ========================== -->
+
+    <section class="card">
+
+      <div class="section-label">
+        <div class="tick"></div>
+        <h2>Featured Work</h2>
+      </div>
+
+      <div class="featured-grid">
+
+        <div class="feature-card">
+
+          <h3>Ember's Flight</h3>
+
+          <p>
+            A Flappy Bird-inspired browser game built for Web Development,
+            with sprite animation and a scoring system.
+          </p>
+
+          <a
+            class="gh-link"
+            href="../Projects/Projects.html"
+          >
+            View Project
+          </a>
+
+        </div>
+
+
+        <div class="feature-card">
+
+          <h3>Pharmacy Inventory System</h3>
+
+          <p>
+            A desktop UI for managing pharmacy stock, built with
+            Qt Designer and a MySQL backend.
+          </p>
+
+          <a
+            class="gh-link"
+            href="../Projects/Projects.html"
+          >
+            View Project
+          </a>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         COMMUNITY INVOLVEMENT
+    ========================== -->
+
+    <section class="card">
+
+      <div class="section-label">
+        <div class="tick"></div>
+        <h2>Community Involvement</h2>
+      </div>
+
+      <p>
+        Beyond coursework, I stay involved in a couple of student
+        organizations on campus.
+      </p>
+
+
+      <div class="org-list">
+
+        <article class="org">
+
+          <h3>Ateneo Red Cross Youth (ARCY)</h3>
+
+          <p>
+            A member of the Ateneo Red Cross Youth, taking part in
+            campus outreach and volunteer initiatives that support
+            first aid awareness and community service.
+          </p>
+
+          <div class="org-gallery">
+
+            <img
+              src="../../img/arcy1.jpg"
+              alt="ARCY activity photo 1"
             >
-                Explore My Work →
-            </a>
 
-        </section>
-
-
-        <!-- ABOUT ME -->
-
-        <section class="card">
-
-            <div class="section-label">
-                <div class="tick"></div>
-                <h2>About Me</h2>
-            </div>
-
-            <!-- Dynamically updated from localStorage -->
-            <p id="profileAbout">
-                I am a student of Information Technology whose interest in the
-                field developed from a curiosity about how technology functions
-                and how it can be applied to solve everyday problems.
-            </p>
-
-        </section>
-
-
-        <!-- SKILLS SNAPSHOT -->
-
-        <section class="card">
-
-            <div class="section-label">
-                <div class="tick"></div>
-                <h2>My Skills</h2>
-            </div>
-
-            <!-- JavaScript creates the skills here -->
-            <div
-                    id="profileSkills"
-                    class="tag-row profile-skills"
-            ></div>
-
-        </section>
-
-
-        <!-- FEATURED WORK -->
-
-        <section class="card">
-
-            <div class="section-label">
-                <div class="tick"></div>
-                <h2>Featured Work</h2>
-            </div>
-
-            <div class="featured-grid">
-
-                <div class="feature-card">
-
-                    <h3>Ember's Flight</h3>
-
-                    <p>
-                        A Flappy Bird-inspired browser game built for Web Development,
-                        with sprite animation and a scoring system.
-                    </p>
-
-                    <a
-                            class="gh-link"
-                            href="../Projects/Projects.html"
-                    >
-                        View Project
-                    </a>
-
-                </div>
-
-
-                <div class="feature-card">
-
-                    <h3>Pharmacy Inventory System</h3>
-
-                    <p>
-                        A desktop UI for managing pharmacy stock, built with
-                        Qt Designer and a MySQL backend.
-                    </p>
-
-                    <a
-                            class="gh-link"
-                            href="../Projects/Projects.html"
-                    >
-                        View Project
-                    </a>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- COMMUNITY INVOLVEMENT -->
-
-        <section class="card">
-
-            <div class="section-label">
-                <div class="tick"></div>
-                <h2>Community Involvement</h2>
-            </div>
-
-            <p>
-                Beyond coursework, I stay involved in a couple of student
-                organizations on campus.
-            </p>
-
-
-            <div class="org-list">
-
-                <article class="org">
-
-                    <h3>Ateneo Red Cross Youth (ARCY)</h3>
-
-                    <p>
-                        A member of the Ateneo Red Cross Youth, taking part in
-                        campus outreach and volunteer initiatives that support
-                        first aid awareness and community service.
-                    </p>
-
-                    <div class="org-gallery">
-
-                        <img
-                                src="../../img/arcy1.jpg"
-                                alt="ARCY activity photo 1"
-                        >
-
-                        <img
-                                src="../../img/arcy2.jpg"
-                                alt="ARCY activity photo 2"
-                        >
-
-                        <img
-                                src="../../img/arcy3.jpg"
-                                alt="ARCY activity photo 3"
-                        >
-
-                    </div>
-
-                </article>
-
-
-                <article class="org">
-
-                    <h3>
-                        Xavier Circle of Information Technology Students (XCITeS)
-                    </h3>
-
-                    <p>
-                        Treasurer for XCITeS, our student organization for computer
-                        enthusiasts, handling budgeting and liquidation reports
-                        for the org's projects and events.
-                    </p>
-
-                    <div class="org-gallery">
-
-                        <img
-                                src="../../img/org1.jpg"
-                                alt="XCITeS activity photo 1"
-                        >
-
-                        <img
-                                src="../../img/org2.jpg"
-                                alt="XCITeS activity photo 2"
-                        >
-
-                        <img
-                                src="../../img/org3.jpg"
-                                alt="XCITeS activity photo 3"
-                        >
-
-                    </div>
-
-                </article>
-
-            </div>
-
-        </section>
-
-
-        <!-- MORE -->
-
-        <section class="card">
-
-            <div class="section-label">
-                <div class="tick"></div>
-                <h2>A Little More...</h2>
-            </div>
-
-            <p>
-                When I'm not studying IT, I like to paint and spend time with my cats.
-            </p>
-
-            <a
-                    class="cta-btn"
-                    href="../About/About.html"
+            <img
+              src="../../img/arcy2.jpg"
+              alt="ARCY activity photo 2"
             >
-                Get to know me →
-            </a>
 
-        </section>
+            <img
+              src="../../img/arcy3.jpg"
+              alt="ARCY activity photo 3"
+            >
+
+          </div>
+
+        </article>
 
 
-    </div>
+        <article class="org">
+
+          <h3>
+            Xavier Circle of Information Technology Students (XCITeS)
+          </h3>
+
+          <p>
+            Treasurer for XCITeS, our student organization for computer
+            enthusiasts, handling budgeting and liquidation reports
+            for the org's projects and events.
+          </p>
+
+          <div class="org-gallery">
+
+            <img
+              src="../../img/org1.jpg"
+              alt="XCITeS activity photo 1"
+            >
+
+            <img
+              src="../../img/org2.jpg"
+              alt="XCITeS activity photo 2"
+            >
+
+            <img
+              src="../../img/org3.jpg"
+              alt="XCITeS activity photo 3"
+            >
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
 
 
-    <!-- FOOTER -->
+    <!-- =========================
+         MORE
+    ========================== -->
 
-    <footer>
+    <section class="card">
 
-        <div class="divider"></div>
+      <div class="section-label">
+        <div class="tick"></div>
+        <h2>A Little More...</h2>
+      </div>
 
-        <p>
-            © 2026 Yana<br>
-            All rights reserved
-        </p>
+      <p>
+        When I'm not studying IT, I like to paint and spend time with my cats.
+      </p>
 
-    </footer>
+      <a
+        class="cta-btn"
+        href="../About/About.html"
+      >
+        Get to know me →
+      </a>
+
+    </section>
+
+
+  </div>
+
+
+  <!-- =========================
+       FOOTER
+  ========================== -->
+
+  <footer>
+
+    <div class="divider"></div>
+
+    <p>
+      © 2026 Yana<br>
+      All rights reserved
+    </p>
+
+  </footer>
 
 
 </div>

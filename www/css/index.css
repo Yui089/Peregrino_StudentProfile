@@ -151,7 +151,7 @@ body{
 h1{
   font-family:'Cormorant Garamond', serif;
   font-weight:600;
-  font-size:22px;
+  font-size:28px;
   color:var(--leather-espresso);
   margin:0 0 4px;
   letter-spacing:0.3px;
@@ -701,6 +701,14 @@ h1{
 }
 
 /* ===== Homepage: intro + explore cards ===== */
+.intro-text{
+  white-space:pre-line;
+  font-size:14px;
+  line-height:1.75;
+  color:#4A3B30;
+  margin:0 0 14px;
+}
+
 .tagline{
   font-family:'Cormorant Garamond', serif;
   font-style:italic;
@@ -1019,7 +1027,8 @@ footer .divider{
 ========================= */
 
 .edit-profile-btn {
-  display: inline-block;
+  display: inline-flex;
+  align-self: flex-start;
   text-decoration: none;
   margin-top: 14px;
   padding: 9px 18px;
@@ -1288,6 +1297,96 @@ footer .divider{
 }
 
 
+/* =========================
+   SKILL RATING EDITOR (in the Edit Profile form)
+========================= */
+
+.skills-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skill-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.skill-edit-row .skill-name-input {
+  flex: 1;
+  min-width: 140px;
+}
+
+.star-picker {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.star-picker .star {
+  background: none;
+  border: none;
+  padding: 2px;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--hairline);
+  cursor: pointer;
+}
+
+.star-picker .star.filled {
+  color: var(--brass);
+}
+
+.remove-skill-btn {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--leather-espresso);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.remove-skill-btn:hover {
+  background: rgba(51, 38, 30, 0.06);
+}
+
+.add-skill-btn {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 8px 16px;
+  border: 1px dashed var(--brass);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--leather-espresso);
+  font-family: 'Work Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.add-skill-btn:hover {
+  background: rgba(180, 136, 78, 0.08);
+}
+
+/* =========================
+   SKILL RATING DISPLAY (on the Skills page)
+========================= */
+
+.skill .star-rating {
+  display: block;
+  color: var(--brass);
+  font-size: 14px;
+  letter-spacing: 2px;
+  margin-top: 2px;
+}
+
+
 /* =====================================================
    ACTIVITY 5 — MOBILE
 ===================================================== */
@@ -1321,12 +1420,4 @@ footer .divider{
     font-size: 0.68rem;
   }
 
-}
-
-.intro-text{
-  white-space:pre-line;
-  font-size:14px;
-  line-height:1.75;
-  color:#4A3B30;
-  margin:0 0 14px;
 }
