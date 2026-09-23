@@ -22,7 +22,6 @@
   ========================== -->
 
   <div class="header-row">
-
     <div class="avatar-frame">
       <div class="avatar-inner" id="avatarWrap">
 
@@ -31,27 +30,26 @@
           alt="Yana's profile photo"
           id="profileImg"
         >
-
         <div class="avatar-fallback">
           <svg viewBox="0 0 24 24" width="34" height="34"
                fill="none" stroke="currentColor" stroke-width="1.6">
             <circle cx="12" cy="8" r="4"></circle>
             <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
           </svg>
-
           <span>Add Photo</span>
         </div>
-
       </div>
+
+      <!-- =========================
+           CAMERA FEATURE
+      ========================== -->
+
+      
     </div>
 
-
     <div class="identity">
-
       <div class="eyebrow">Student Profile</div>
-
       <h1 id="profileName">Haiana Peregrino</h1>
-
       <div class="subtitle" id="profileCourseYear">
         Information Technology Student · Xavier University — Ateneo de Cagayan
       </div>
@@ -64,10 +62,16 @@
         Edit Profile
       </button>
 
+      <button
+        type="button"
+        id="changeProfilePicture"
+        class="change-profile-picture-btn"
+      >
+        Change Profile Picture
+      </button>
+
     </div>
-
   </div>
-
 
   <!-- =========================
        NAVIGATION
@@ -97,7 +101,6 @@
 
   </nav>
 
-
   <!-- =====================================================
        EDIT PROFILE FORM
        Hidden until the Edit Profile button is clicked
@@ -108,7 +111,6 @@
     class="card edit-profile-card"
     hidden
   >
-
     <div class="section-label">
       <div class="tick"></div>
       <h2>Edit Profile</h2>
@@ -124,13 +126,10 @@
     <form id="editProfileForm" class="edit-profile-form">
 
       <!-- INTRODUCTION -->
-
       <div class="form-group">
-
         <label for="editIntro">
           Introduction
         </label>
-
         <textarea
           id="editIntro"
           name="intro"
@@ -358,11 +357,11 @@
 
       <p class="intro-text" id="profileIntro">"He who plants a tree plants hope."
 
-Welcome to my little corner of the internet, where school projects, experiments, and ideas come together. Take a look around to see what I've learned, what I've built, and where I'm headed next.
+      Welcome to my little corner of the internet, where school projects, experiments, and ideas come together. Take a look around to see what I've learned, what I've built, and where I'm headed next.
 
-My time in IT has taken me through more than just programming. I've explored web development, databases, networking, and mobile applications, each giving me a different perspective on what technology can do. Some projects have been smooth, while others have involved a lot of "why isn't this working?" moments.
+      My time in IT has taken me through more than just programming. I've explored web development, databases, networking, and mobile applications, each giving me a different perspective on what technology can do. Some projects have been smooth, while others have involved a lot of "why isn't this working?" moments.
 
-This website brings those pieces together. You'll find a little bit of my work, the skills I'm developing, and the direction I'm exploring as I continue building my place in the world of IT.</p>
+      This website brings those pieces together. You'll find a little bit of my work, the skills I'm developing, and the direction I'm exploring as I continue building my place in the world of IT.</p>
 
       <a
         class="cta-btn"
@@ -606,6 +605,10 @@ This website brings those pieces together. You'll find a little bit of my work, 
 </div>
 
 
+<!-- Cordova -->
+<script src="cordova.js"></script>
+
+<!-- Existing Activity 5 JavaScript -->
 <script src="../../js/index.js"></script>
 
 </body>

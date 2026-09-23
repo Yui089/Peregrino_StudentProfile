@@ -1421,3 +1421,36 @@ footer .divider{
   }
 
 }
+
+#profilePicture {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #ccc;
+}
+
+#changeProfilePicture {
+    margin-top: 10px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.profile-actions button {
+  cursor: pointer;
+}
+
+.change-profile-picture-btn {
+  padding: 12px 18px;
+}
