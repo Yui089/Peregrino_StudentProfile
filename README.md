@@ -1,5 +1,4 @@
-<img width="2000" height="1200" alt="f65bb9d0-942c-455b-ac75-221ce96e7a63" src="https://github.com/user-attachments/assets/f00768ca-1c7c-463a-b198-95f27fd82f18" />
-  # Peregrino — Student Profile
+# Yana — Student Profile
 
 ## 1. Project Description
 
@@ -84,17 +83,16 @@ The application uses responsive design techniques so that its interface can adju
 The application is designed to remain usable across:
 
 - **Desktop** — Provides a wider layout for larger screens.
-  
+
   <img width="559" height="317" alt="Screenshot 2026-09-25 021058" src="https://github.com/user-attachments/assets/1d3ad974-5d62-4a5a-8e01-403130027b48" />
 
 - **Tablet** — Adjusts the layout and spacing for medium sized screens.
- <img width="559" height="317" alt="ef98031e-3a54-4559-a447-78f7dc9ae8f8" src="https://github.com/user-attachments/assets/c4db2841-94fc-4303-9ab8-1575abf41c79" />
 
+  <img width="559" height="317" alt="ef98031e-3a54-4559-a447-78f7dc9ae8f8" src="https://github.com/user-attachments/assets/c4db2841-94fc-4303-9ab8-1575abf41c79" />
 
 - **Mobile** — Uses a compact layout suitable for smaller device screens.
- <img width="222" height="548" alt="f66771cd-68fd-4c95-ba77-7e466acb22b8" src="https://github.com/user-attachments/assets/93d4f0ad-40d0-4101-81ac-a1f4b4905e4f" />
 
-
+  <img width="222" height="548" alt="f66771cd-68fd-4c95-ba77-7e466acb22b8" src="https://github.com/user-attachments/assets/93d4f0ad-40d0-4101-81ac-a1f4b4905e4f" />
 
 This allows the pages and profile features to remain accessible regardless of the device being used.
 
@@ -118,39 +116,76 @@ Clone the project repository and open the project folder in a terminal.
 ```bash
 git clone https://github.com/Yui089/Peregrino_StudentProfile.git
 cd Peregrino_Start
-- **Tablet** — Adjusts the layout and spacing for medium sized screens.
-- **Mobile** — Uses a compact layout suitable for smaller device screens.
+```
 
-This allows the pages and profile features to remain accessible regardless of the device being used.
-
-## 9. How to Run
-
-### Prerequisites
-
-Install the following:
-
-- Node.js and npm
-- Apache Cordova
-- Android Studio
-- Android SDK
-- Java JDK
-- Android device or Android emulator
-
-### Install Dependencies
-
-Clone the project repository and open the project folder in a terminal.
+Install the project dependencies:
 
 ```bash
-git clone https://github.com/Yui089/Peregrino_StudentProfile.git
-cd Peregrino_Start
+npm install
+```
+
+### Configure the Cordova Project
+
+Make sure the Android platform is installed:
+
+```bash
+cordova platform add android
+```
+
+If the Android platform is already included in the project, this step is not necessary.
+
+### Install the Camera Plugin
+
+Install the Cordova Camera Plugin:
+
+```bash
+cordova plugin add cordova-plugin-camera
+```
+
+The project uses:
+
+```text
+cordova-plugin-camera 8.0.0
+```
+
+The application also uses the Cordova File Plugin:
+
+```bash
+cordova plugin add cordova-plugin-file
+```
+
+### Build the Application
+
+Build the Android application using:
+
+```bash
+cordova build android
+```
+
+### Run the Application
+
+To run the application on a connected Android device or emulator:
+
+```bash
+cordova run android
+```
+
+The application can also be opened and built through Android Studio using the generated Android project located inside:
+
+```text
+platforms/android
+```
 
 ## 10. Screenshots
 
-Before:
+### Before
+
 <img width="559" height="317" alt="ef98031e-3a54-4559-a447-78f7dc9ae8f8" src="https://github.com/user-attachments/assets/ad2ace5e-707b-4b43-84ea-83f2e4b76f05" />
 
-Camera:
+### Camera
+
 <img width="559" height="317" alt="f65bb9d0-942c-455b-ac75-221ce96e7a63" src="https://github.com/user-attachments/assets/5d8e19bf-5285-48e4-bb48-dc2a3bed570c" />
 
-After:
+### After
+
 <img width="559" height="317" alt="091dfa07-b121-4e99-8217-e50d4e3c3730" src="https://github.com/user-attachments/assets/dc3698fc-76c7-4be6-af1b-594f00da5b88" />
