@@ -72,10 +72,11 @@ body{
   position:relative;
 }
 
+/* Profile picture frame: rounded square (was a circle) */
 .avatar-frame{
   width:112px;
   height:112px;
-  border-radius:50%;
+  border-radius:28px;
   background:conic-gradient(var(--brass) 0deg, var(--brass-light) 90deg, var(--brass) 180deg, var(--brass-light) 270deg, var(--brass) 360deg);
   border:5px solid var(--dial-cream);
   box-shadow:0 4px 14px var(--shadow);
@@ -88,7 +89,7 @@ body{
 .avatar-inner{
   width:88px;
   height:88px;
-  border-radius:50%;
+  border-radius:16px;
   background:var(--ivory);
   border:3px solid var(--leather-espresso);
   display:flex;
@@ -123,6 +124,9 @@ body{
 }
 
 .avatar-inner.no-photo .avatar-fallback{ display:flex; }
+
+/* Hide a broken image so its alt text never shows in the frame */
+.avatar-inner.no-photo img{ display:none; }
 
 .identity{
   padding-bottom:8px;
@@ -216,7 +220,7 @@ header h1, header h2,
   font-size: 22px;
   font-weight: 700;
   letter-spacing: 1.5px;
-  color: #f7f3ed !important; /
+  color: #f7f3ed !important;
   margin: 0;
   text-transform: capitalize;
   display: flex;
@@ -260,8 +264,8 @@ header h1, header h2,
   text-align: center;
 }
 
-.tabbar a:hover { 
-  background: rgba(51, 38, 30, 0.05); 
+.tabbar a:hover {
+  background: rgba(51, 38, 30, 0.05);
 }
 
 .tabbar a.active {
@@ -1042,8 +1046,8 @@ footer .divider{
     gap:24px;
   }
 
-  .avatar-frame{ width:148px; height:148px; }
-  .avatar-inner{ width:118px; height:118px; }
+  .avatar-frame{ width:148px; height:148px; border-radius:34px; }
+  .avatar-inner{ width:118px; height:118px; border-radius:21px; }
 
   h1{ font-size:34px; }
 
@@ -1073,8 +1077,8 @@ footer .divider{
     gap:28px;
   }
 
-  .avatar-frame{ width:172px; height:172px; border-width:6px; }
-  .avatar-inner{ width:138px; height:138px; }
+  .avatar-frame{ width:172px; height:172px; border-width:6px; border-radius:40px; }
+  .avatar-inner{ width:138px; height:138px; border-radius:26px; }
 
   h1{ font-size:40px; }
 
