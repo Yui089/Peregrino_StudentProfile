@@ -27,6 +27,7 @@ body{
   font-family:'Work Sans', sans-serif;
   overflow-x:hidden;
   width:100%;
+  padding-bottom: 70px;
 }
 
 .page{
@@ -164,38 +165,113 @@ h1{
   letter-spacing:0.3px;
 }
 
-/* ===== Tab bar ===== */
-.tabbar{
-  display:flex;
-  gap:2px;
-  background:var(--dial-cream);
-  border-bottom:1px solid var(--hairline);
-  padding:0 8px;
-  overflow-x:auto;
+/* ===== Page Title Header for Secondary Pages ===== */
+.page-header {
+  padding: 28px 20px 18px;
+  background: var(--dial-cream, #f7f3ed);
+  border-bottom: 1px solid var(--hairline, #e2d9cd);
+  margin-bottom: 20px;
 }
 
-.tabbar a{
-  font-family:'JetBrains Mono', monospace;
-  font-size:9.5px;
-  letter-spacing:0.4px;
-  text-transform:uppercase;
-  color:var(--leather-espresso);
-  text-decoration:none;
-  padding:14px 7px 12px;
-  border-bottom:2px solid transparent;
-  white-space:nowrap;
-  transition:all 0.15s ease;
-  flex:1;
-  min-width:0;
-  text-align:center;
+.page-header .eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--brass, #a37c3f);
+  margin-bottom: 4px;
 }
 
-.tabbar a:hover{ background:rgba(51,38,30,0.05); }
+.page-header h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 30px;
+  margin: 0 0 4px 0;
+  color: var(--leather-espresso, #2c221e);
+  font-weight: 600;
+}
 
-.tabbar a.active{
-  border-bottom-color:var(--brass);
-  color:var(--brass);
-  font-weight:600;
+.page-header .subtitle {
+  font-family: 'Work Sans', sans-serif;
+  font-size: 13px;
+  color: #76695e;
+}
+
+/* ===== Elegant Dark Leather Header ===== */
+header, .header, .page-header {
+  background: linear-gradient(135deg, #2c221e 0%, #3d2f29 100%);
+  padding: 18px 24px;
+  margin: 0 0 20px 0;
+  border-bottom: 3px solid #a37c3f; /* Brass bottom border */
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 6px 16px rgba(44, 34, 30, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+header h1, header h2,
+.header h1, .header h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #f7f3ed !important; /
+  margin: 0;
+  text-transform: capitalize;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+
+
+/* ===== Centered Bottom Navigation ===== */
+.tabbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  background: var(--leather-espresso, #2c221e);
+  border-top: 1px solid var(--hairline, #e2d9cd);
+  padding: 0 12px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
+.tabbar a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #f7f3ed !important;
+  color: var(--leather-espresso, #2c221e);
+  text-decoration: none;
+  padding: 14px 6px 12px;
+  border-top: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.tabbar a:hover { 
+  background: rgba(51, 38, 30, 0.05); 
+}
+
+.tabbar a.active {
+  border-top-color: var(--brass, #a37c3f);
+  color: var(--brass, #a37c3f);
+  font-weight: 600;
+}
+
+#avatarWrap {
+  cursor: pointer;
 }
 
 /* ===== Body grid ===== */

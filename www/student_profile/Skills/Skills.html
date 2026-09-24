@@ -4,41 +4,41 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Yana — Skills</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="../../css/index.css">
 </head>
+
 <body>
 
 <div class="page">
 
-  <div class="cover"></div>
+    <header class="page-header">
+  <h1>Skills</h1>
+</header>
 
-  <div class="header-row">
-    <div class="avatar-frame">
-      <div class="avatar-inner" id="avatarWrap">
-        <img src="../../img/pfp2.jpg" alt="Yana's profile photo" id="profileImg">
-        <div class="avatar-fallback">
-          <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6">
-            <circle cx="12" cy="8" r="4"></circle>
-            <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
-          </svg>
-          <span>Add Photo</span>
-        </div>
+  <!-- Body Content Grid -->
+  <div class="body-grid" style="margin-top: 32px;">
+
+    <section class="card">
+      <div class="section-label">
+        <div class="tick"></div>
+        <h2>Technical Skills &amp; Competencies</h2>
       </div>
-    </div>
-    <div class="identity">
-      <div class="eyebrow">Student Profile</div>
-      <h1 id="profileName">Haiana Peregrino</h1>
-      <div class="subtitle" id="profileCourseYear">
-        Information Technology Student · Xavier University — Ateneo de Cagayan
-      </div>
-      <a href="../Homepage/Index.html#editProfileSection" class="edit-profile-btn">
-        Edit Profile
-      </a>
-    </div>
+
+      <p class="intro-text">
+        Here is a breakdown of the skills and technologies I have worked with throughout my IT studies.
+      </p>
+
+      <!-- Container populated dynamically by JS index.js -->
+      <div id="profileSkillsList" class="skills-list"></div>
+    </section>
+
   </div>
 
+  <!-- Centered Bottom Navigation Bar -->
   <nav class="tabbar">
     <a href="../Homepage/Index.html">Profile</a>
     <a href="../About/About.html">About</a>
@@ -47,23 +47,9 @@
     <a href="../Contacts/Contacts.html">Contact</a>
   </nav>
 
-  <div class="body-grid">
-    <section id="skills" class="card">
-      <div class="section-label"><div class="tick"></div><h2>Skills &amp; Areas of Interest</h2></div>
-      <p>A mix of development fundamentals and the practical, organizational skills that come with running a student org's finances. The stars show how confident I currently am in each area.</p>
-
-      <!-- JavaScript builds the skill list (with star ratings) here -->
-      <div id="profileSkillsList" class="skill-list"></div>
-    </section>
-  </div>
-
-  <footer>
-    <div class="divider"></div>
-    <p>© 2026 Yana<br>All rights reserved</p>
-  </footer>
-
 </div>
 
+<script src="cordova.js"></script>
 <script src="../../js/index.js"></script>
 </body>
 </html>

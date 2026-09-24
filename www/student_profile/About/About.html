@@ -1,46 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yana — About</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/index.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yana — About</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../../css/index.css">
 </head>
+
 <body>
 
 <div class="page">
 
-  <div class="cover"></div>
+    <header class="page-header">
+  <h1>About</h1>
+</header>
 
-  <!-- HEADER -->
-  <div class="header-row">
-    <div class="avatar-frame">
-      <div class="avatar-inner" id="avatarWrap">
-        <img src="../../img/pfp2.jpg" alt="Yana's profile photo" id="profileImg">
-        <div class="avatar-fallback">
-          <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6">
-            <circle cx="12" cy="8" r="4"></circle>
-            <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
-          </svg>
-          <span>Add Photo</span>
-        </div>
+  <!-- Body Content Grid -->
+  <div class="body-grid" style="margin-top: 32px;">
+
+    <!-- ABOUT ME -->
+    <section class="card">
+      <div class="section-label">
+        <div class="tick"></div>
+        <h2>About Me</h2>
       </div>
-    </div>
-    <div class="identity">
-      <div class="eyebrow">Student Profile</div>
-      <h1 id="profileName">Haiana Peregrino</h1>
-      <div class="subtitle" id="profileCourseYear">
-        Information Technology Student · Xavier University — Ateneo de Cagayan
+
+      <p class="intro-text" id="profileAbout">
+        I am a student of Information Technology whose interest in the field developed from a curiosity about how technology functions and how it can be applied to solve everyday problems. Throughout my studies, I have been introduced to web development, databases, networking, programming, and mobile application development.
+      </p>
+    </section>
+
+    <!-- MY INTERESTS -->
+    <section class="card">
+      <div class="section-label">
+        <div class="tick"></div>
+        <h2>My Interests</h2>
       </div>
-      <a href="../Homepage/Index.html#editProfileSection" class="edit-profile-btn">
-        Edit Profile
-      </a>
-    </div>
+
+      <p class="intro-text" id="profileInterests" style="white-space: pre-line;">
+        Web Development — Working with HTML, CSS, and JavaScript to construct organized and responsive interfaces.
+
+        Databases — Studying MySQL and the methods by which information is stored, organized, and retrieved.
+
+        User Interface and Design — Attention to layout, spacing, consistency, and the overall experience of the user.
+
+        Networking — A developing understanding of how devices and networks communicate, which has clarified the infrastructure supporting the applications in common use.
+
+        Learning Through Projects — A preference for acquiring knowledge through practical construction and the examination of how individual components function together.
+      </p>
+    </section>
+
+    <!-- EDUCATIONAL BACKGROUND -->
+    <section class="card">
+      <div class="section-label">
+        <div class="tick"></div>
+        <h2>Educational Background</h2>
+      </div>
+
+      <p class="intro-text" id="profileEducation" style="white-space: pre-line;">
+        Bachelor of Science in Information Technology — Currently Pursuing
+        A candidate for the degree of Bachelor of Science in Information Technology, with coursework encompassing programming, database management, networking, web development, mobile applications, and related areas of the discipline.
+
+        Senior High School — Xavier University — Ateneo de Cagayan · 2022–2024
+        Completed a period of work immersion at A Brown Company Inc.
+      </p>
+    </section>
+
+    <!-- GOALS & ASPIRATIONS -->
+    <section class="card">
+      <div class="section-label">
+        <div class="tick"></div>
+        <h2>Goals &amp; Aspirations</h2>
+      </div>
+
+      <p class="intro-text" id="profileGoals">
+        A professional objective of pursuing a career as a Data Analyst.
+      </p>
+    </section>
+
   </div>
 
-  <!-- NAVIGATION TABBAR -->
+  <!-- Centered Bottom Navigation Bar -->
   <nav class="tabbar">
     <a href="../Homepage/Index.html">Profile</a>
     <a href="../About/About.html" class="active">About</a>
@@ -49,45 +93,10 @@
     <a href="../Contacts/Contacts.html">Contact</a>
   </nav>
 
-  <!-- BODY GRID CONTAINING ABOUT DATA -->
-  <div class="body-grid">
-    <section id="about" class="card">
-      <div class="section-label">
-        <div class="tick"></div>
-        <h2>About Me</h2>
-      </div>
-
-      <!-- ABOUT ME -->
-      <p class="intro-text" id="profileAbout"></p>
-
-      <!-- INTERESTS -->
-      <div class="info-block">
-        <div class="info-label">Interests</div>
-        <p class="intro-text" id="profileInterests"></p>
-      </div>
-
-      <!-- EDUCATIONAL BACKGROUND -->
-      <div class="info-block">
-        <div class="info-label">Educational Background</div>
-        <p class="intro-text" id="profileEducation"></p>
-      </div>
-
-      <!-- GOALS & ASPIRATIONS -->
-      <div class="info-block">
-        <div class="info-label">Goals & Aspirations</div>
-        <p class="intro-text" id="profileGoals"></p>
-      </div>
-    </section>
-  </div>
-
-  <footer>
-    <div class="divider"></div>
-    <p>© 2026 Yana<br>All rights reserved</p>
-  </footer>
 
 </div>
 
-<!-- SCRIPT IMPORT -->
+<script src="cordova.js"></script>
 <script src="../../js/index.js"></script>
 </body>
 </html>
