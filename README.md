@@ -1,4 +1,4 @@
-# Yana — Student Profile
+# Peregrino — Student Profile
 
 ## 1. Project Description
 
