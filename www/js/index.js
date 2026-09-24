@@ -203,7 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
     navigator.camera.getPicture(
       function onPhotoSuccess(imageData) {
         if (!profileImg) return;
-        const imageSource = 'data:image/jpeg;base64,' + imageData;
+        const imageSource = imageData;
+        usingCustomPhoto = true;
         profileImg.src = imageSource;
 
         try {
@@ -212,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
           console.error('Unable to save profile picture:', error);
           alert('The photo was captured, but it could not be saved. Please try again.');
         }
-      },
+      }
       function onPhotoError(error) {
         if (error && (error.toLowerCase().includes('cancel') || error === 'No Image Selected')) {
           return;
