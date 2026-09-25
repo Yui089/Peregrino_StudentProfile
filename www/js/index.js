@@ -1,4 +1,8 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+
+  /* =====================================================
+     1. DEFAULT PROFILE FALLBACK DATA
+  ====================================================== */
   const defaultProfile = {
     intro:
       '"He who plants a tree plants hope."\n\nWelcome to my little corner of the internet, where school projects, experiments, and ideas come together. Take a look around to see what I\'ve learned, what I\'ve built, and where I\'m headed next.\n\nMy time in IT has taken me through more than just programming. I\'ve explored web development, databases, networking, and mobile applications, each giving me a different perspective on what technology can do. Some projects have been smooth, while others have involved a lot of "why isn\'t this working?" moments.\n\nThis website brings those pieces together. You\'ll find a little bit of my work, the skills I\'m developing, and the direction I\'m exploring as I continue building my place in the world of IT.',
@@ -40,33 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   /* =====================================================
-     GET SAVED PROFILE
-  ====================================================== */
-  function getProfile() {
-    const savedProfile = localStorage.getItem('studentProfileData');
-    if (!savedProfile) return defaultProfile;
-
-    try {
-      const parsedProfile = JSON.parse(savedProfile);
-      const mergedProfile = { ...defaultProfile, ...parsedProfile };
-
-      if (!Array.isArray(mergedProfile.skills)) {
-        mergedProfile.skills = defaultProfile.skills;
-      }
-
-      if (!Array.isArray(mergedProfile.orgs)) {
-        mergedProfile.orgs = defaultProfile.orgs;
-      }
-
-      return mergedProfile;
-    } catch (error) {
-      console.error('Unable to read saved profile:', error);
-      return defaultProfile;
-    }
-  }
-
-  /* =====================================================
-     STAR RENDERING HELPER
+     2. HELPER FUNCTIONS & RENDERING
   ====================================================== */
   function starsForRating(rating) {
     let stars = '';
@@ -76,9 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return stars;
   }
 
-  /* =====================================================
-     DISPLAY PROFILE INFORMATION
-  ====================================================== */
   function displayProfile(profile) {
     const profileIntro = document.getElementById('profileIntro');
     const profileName = document.getElementById('profileName');
@@ -90,6 +65,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileSkills = document.getElementById('profileSkills');
     const profileSkillsList = document.getElementById('profileSkillsList');
     const profileOrgsList = document.getElementById('profileOrgsList');
+    const profileImg = document.getElementById('profileImg');
+
+    if (profile.profilePicture && profileImg) {
+      profileImg.src = profile.profilePicture;
+    }
 
     if (profileIntro) profileIntro.textContent = profile.intro;
     if (profileName) profileName.textContent = profile.fullName;
@@ -107,18 +87,18 @@ document.addEventListener('DOMContentLoaded', () => {
     /* SKILLS: Tag List */
     if (profileSkills) {
       profileSkills.innerHTML = '';
-      profile.skills.forEach(skill => {
+      (profile.skills || []).forEach(skill => {
         const skillTag = document.createElement('span');
         skillTag.className = 'tag';
-        skillTag.textContent = skill.name;
+        skillTag.textContent = typeof skill === 'string' ? skill : skill.name;
         profileSkills.appendChild(skillTag);
       });
     }
 
-    /* SKILLS: Detailed List */
+    /* SKILLS: Detailed Star List */
     if (profileSkillsList) {
       profileSkillsList.innerHTML = '';
-      profile.skills.forEach(skill => {
+      (profile.skills || []).forEach(skill => {
         const row = document.createElement('div');
         row.className = 'skill';
 
@@ -131,11 +111,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const name = document.createElement('span');
         name.className = 'name';
-        name.textContent = skill.name;
+        name.textContent = typeof skill === 'string' ? skill : skill.name;
 
         const stars = document.createElement('span');
         stars.className = 'star-rating';
-        stars.textContent = starsForRating(skill.rating);
+        stars.textContent = starsForRating(skill.rating || 3);
 
         body.appendChild(name);
         body.appendChild(stars);
@@ -145,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    /* ORGANIZATIONS / COMMUNITY INVOLVEMENT */
+    /* ORGANIZATIONS */
     if (profileOrgsList) {
       profileOrgsList.innerHTML = '';
       (profile.orgs || []).forEach(org => {
@@ -182,136 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* =====================================================
-     CAMERA / PROFILE PICTURE
-  ====================================================== */
-  const changeProfilePicture = document.getElementById('changeProfilePicture');
-  const avatarWrap = document.getElementById('avatarWrap');
-  const profileImg = document.getElementById('profileImg');
-  const savedProfilePicture = localStorage.getItem('profilePicture');
-
-  /* Load previously saved profile picture */
-  if (savedProfilePicture && profileImg) {
-    profileImg.src = savedProfilePicture;
-  }
-
-  function takeProfilePicture() {
-    if (!navigator.camera || !window.Camera) {
-      alert('Camera plugin not detected. Please run the app on a Cordova device or emulator with cordova-plugin-camera installed.');
-      return;
-    }
-
-    navigator.camera.getPicture(
-      function onPhotoSuccess(imageData) {
-        if (!profileImg) return;
-        const imageSource = imageData;
-        usingCustomPhoto = true;
-        profileImg.src = imageSource;
-
-        try {
-          localStorage.setItem('profilePicture', imageSource);
-        } catch (error) {
-          console.error('Unable to save profile picture:', error);
-          alert('The photo was captured, but it could not be saved. Please try again.');
-        }
-      }
-      function onPhotoError(error) {
-        if (error && (error.toLowerCase().includes('cancel') || error === 'No Image Selected')) {
-          return;
-        }
-        console.error('Camera error:', error);
-        alert('Unable to access the camera. Please try again.');
-      },
-      {
-        quality: 80,
-        destinationType: window.Camera.DestinationType.DATA_URL,
-        sourceType: window.Camera.PictureSourceType.CAMERA,
-        encodingType: window.Camera.EncodingType.JPEG,
-        mediaType: window.Camera.MediaType.PICTURE,
-        correctOrientation: true,
-        saveToPhotoAlbum: false
-      }
-    );
-  }
-
-  // Allow clicking the button to change picture
-  if (changeProfilePicture) {
-    changeProfilePicture.addEventListener('click', takeProfilePicture);
-  }
-
-  // Allow clicking the picture itself to change it
-  if (avatarWrap) {
-    avatarWrap.addEventListener('click', takeProfilePicture);
-    avatarWrap.style.cursor = 'pointer'; // Visual feedback
-  }
-
-  /* =====================================================
-     ORGANIZATIONS EDITOR (ADD / REMOVE ORGS)
-  ====================================================== */
-  const orgsEditor = document.getElementById('orgsEditor');
-  const addOrgBtn = document.getElementById('addOrgBtn');
-
-  function createOrgRow(name = '', description = '', images = '') {
-    const card = document.createElement('div');
-    card.className = 'org-edit-card';
-
-    card.innerHTML = `
-      <div class="org-edit-header">
-        <label>Organization Name</label>
-        <button type="button" class="remove-skill-btn remove-org-btn" aria-label="Remove organization">✕</button>
-      </div>
-      <input type="text" class="org-name-input" value="${name}" placeholder="e.g. Ateneo Red Cross Youth (ARCY)">
-      
-      <label style="margin-top: 10px;">Description</label>
-      <textarea class="org-desc-input" rows="3" placeholder="Describe your involvement or responsibilities...">${description}</textarea>
-      
-      <label style="margin-top: 10px;">Image URLs / Paths (comma-separated)</label>
-      <input type="text" class="org-images-input" value="${images}" placeholder="../../img/org1.jpg, ../../img/org2.jpg">
-    `;
-
-    card.querySelector('.remove-org-btn').addEventListener('click', () => {
-      card.remove();
-    });
-
-    return card;
-  }
-
-  function fillOrgsEditor(orgs) {
-    if (!orgsEditor) return;
-    orgsEditor.innerHTML = '';
-    (orgs || []).forEach(org => {
-      orgsEditor.appendChild(createOrgRow(org.name, org.description, org.images));
-    });
-  }
-
-  if (addOrgBtn && orgsEditor) {
-    addOrgBtn.addEventListener('click', () => {
-      const row = createOrgRow('', '', '');
-      orgsEditor.appendChild(row);
-      const input = row.querySelector('.org-name-input');
-      if (input) input.focus();
-    });
-  }
-
-  function collectOrgsFromEditor() {
-    if (!orgsEditor) return [];
-    const rows = orgsEditor.querySelectorAll('.org-edit-card');
-    const orgs = [];
-
-    rows.forEach(row => {
-      const name = row.querySelector('.org-name-input').value.trim();
-      const description = row.querySelector('.org-desc-input').value.trim();
-      const images = row.querySelector('.org-images-input').value.trim();
-
-      if (name !== '') {
-        orgs.push({ name, description, images });
-      }
-    });
-
-    return orgs;
-  }
-
-  /* =====================================================
-     SKILLS EDITOR
+     3. SKILLS EDITOR (STAR PICKER & ADD/REMOVE)
   ====================================================== */
   const skillsEditor = document.getElementById('skillsEditor');
   const addSkillBtn = document.getElementById('addSkillBtn');
@@ -408,7 +259,70 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* =====================================================
-     EDIT FORM POPULATION & EVENT LISTENERS
+     4. ORGANIZATIONS EDITOR
+  ====================================================== */
+  const orgsEditor = document.getElementById('orgsEditor');
+  const addOrgBtn = document.getElementById('addOrgBtn');
+
+  function createOrgRow(name = '', description = '', images = '') {
+    const card = document.createElement('div');
+    card.className = 'org-edit-card';
+
+    card.innerHTML = `
+      <div class="org-edit-header">
+        <label>Organization Name</label>
+        <button type="button" class="remove-skill-btn remove-org-btn" aria-label="Remove organization">✕</button>
+      </div>
+      <input type="text" class="org-name-input" value="${name}" placeholder="e.g. Ateneo Red Cross Youth (ARCY)">
+      
+      <label style="margin-top: 10px;">Description</label>
+      <textarea class="org-desc-input" rows="3" placeholder="Describe your involvement or responsibilities...">${description}</textarea>
+      
+      <label style="margin-top: 10px;">Image URLs / Paths (comma-separated)</label>
+      <input type="text" class="org-images-input" value="${images}" placeholder="../../img/org1.jpg, ../../img/org2.jpg">
+    `;
+
+    card.querySelector('.remove-org-btn').addEventListener('click', () => card.remove());
+    return card;
+  }
+
+  function fillOrgsEditor(orgs) {
+    if (!orgsEditor) return;
+    orgsEditor.innerHTML = '';
+    (orgs || []).forEach(org => {
+      orgsEditor.appendChild(createOrgRow(org.name, org.description, org.images));
+    });
+  }
+
+  if (addOrgBtn && orgsEditor) {
+    addOrgBtn.addEventListener('click', () => {
+      const row = createOrgRow('', '', '');
+      orgsEditor.appendChild(row);
+      const input = row.querySelector('.org-name-input');
+      if (input) input.focus();
+    });
+  }
+
+  function collectOrgsFromEditor() {
+    if (!orgsEditor) return [];
+    const rows = orgsEditor.querySelectorAll('.org-edit-card');
+    const orgs = [];
+
+    rows.forEach(row => {
+      const name = row.querySelector('.org-name-input').value.trim();
+      const description = row.querySelector('.org-desc-input').value.trim();
+      const images = row.querySelector('.org-images-input').value.trim();
+
+      if (name !== '') {
+        orgs.push({ name, description, images });
+      }
+    });
+
+    return orgs;
+  }
+
+  /* =====================================================
+     5. FORM DOM ELEMENTS & EDIT TOGGLE LISTENERS
   ====================================================== */
   const editProfileBtn = document.getElementById('editProfileBtn');
   const editProfileSection = document.getElementById('editProfileSection');
@@ -425,57 +339,83 @@ document.addEventListener('DOMContentLoaded', () => {
   const editEducation = document.getElementById('editEducation');
   const editGoals = document.getElementById('editGoals');
 
-  let currentProfile = getProfile();
-  displayProfile(currentProfile);
+  let currentProfile = defaultProfile;
 
   function fillEditForm(profile) {
-    if (editIntro) editIntro.value = profile.intro;
-    if (editFullName) editFullName.value = profile.fullName;
-    if (editCourse) editCourse.value = profile.course;
-    if (editYearLevel) editYearLevel.value = profile.yearLevel;
-    if (editAbout) editAbout.value = profile.about;
-    if (editInterests) editInterests.value = profile.interests;
-    if (editEducation) editEducation.value = profile.education;
-    if (editGoals) editGoals.value = profile.goals;
+    if (editIntro) editIntro.value = profile.intro || '';
+    if (editFullName) editFullName.value = profile.fullName || '';
+    if (editCourse) editCourse.value = profile.course || '';
+    if (editYearLevel) editYearLevel.value = profile.yearLevel || '';
+    if (editAbout) editAbout.value = profile.about || '';
+    if (editInterests) editInterests.value = profile.interests || '';
+    if (editEducation) editEducation.value = profile.education || '';
+    if (editGoals) editGoals.value = profile.goals || '';
 
     fillSkillsEditor(profile.skills);
     fillOrgsEditor(profile.orgs);
   }
 
-  function openEditProfile() {
-    if (!editProfileBtn || !editProfileSection) return;
-
-    fillEditForm(currentProfile);
-
-    if (editProfileMessage) {
-      editProfileMessage.textContent = '';
-      editProfileMessage.className = 'form-message';
-    }
-
-    editProfileSection.hidden = false;
-    editProfileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
   if (editProfileBtn && editProfileSection) {
-    editProfileBtn.addEventListener('click', openEditProfile);
-  }
-
-  if (cancelEditBtn && editProfileSection) {
-    cancelEditBtn.addEventListener('click', () => {
+    editProfileBtn.addEventListener('click', () => {
       fillEditForm(currentProfile);
       if (editProfileMessage) {
         editProfileMessage.textContent = '';
         editProfileMessage.className = 'form-message';
       }
-      editProfileSection.hidden = true;
+      editProfileSection.removeAttribute('hidden');
+      editProfileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  if (cancelEditBtn && editProfileSection) {
+    cancelEditBtn.addEventListener('click', () => {
+      editProfileSection.setAttribute('hidden', 'true');
     });
   }
 
   /* =====================================================
-     SAVE FORM SUBMISSION WITH VALIDATION
+     6. AUTH & DATABASE DATA FETCHING
+  ====================================================== */
+  let user = null;
+
+  try {
+    const sessionResponse = await supabase.auth.getUser();
+    user = sessionResponse.data?.user;
+  } catch (err) {
+    console.warn('Supabase auth not initialized or offline. Using default profile mode.');
+  }
+
+  if (user) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (!error && data) {
+      currentProfile = {
+        fullName: data.full_name || defaultProfile.fullName,
+        course: data.course || defaultProfile.course,
+        yearLevel: data.year_level || defaultProfile.yearLevel,
+        intro: data.intro || defaultProfile.intro,
+        about: data.about || defaultProfile.about,
+        interests: data.interests || defaultProfile.interests,
+        education: data.education || defaultProfile.education,
+        goals: data.goals || defaultProfile.goals,
+        skills: Array.isArray(data.skills) && data.skills.length > 0 ? data.skills : defaultProfile.skills,
+        orgs: Array.isArray(data.orgs) && data.orgs.length > 0 ? data.orgs : defaultProfile.orgs,
+        profilePicture: data.profile_picture || null
+      };
+    }
+  }
+
+  displayProfile(currentProfile);
+
+  /* =====================================================
+     7. SAVE FORM SUBMISSION & VALIDATION
   ====================================================== */
   if (editProfileForm) {
-    editProfileForm.addEventListener('submit', event => {
+    editProfileForm.addEventListener('submit', async event => {
       event.preventDefault();
 
       const intro = editIntro ? editIntro.value.trim() : '';
@@ -501,25 +441,38 @@ document.addEventListener('DOMContentLoaded', () => {
       if (skills.length === 0) { showMessage('Please add at least one skill.', 'error'); return; }
 
       const updatedProfile = {
-        intro, fullName, course, yearLevel, about, interests, education, goals, skills, orgs
+        intro, fullName, course, yearLevel, about, interests, education, goals, skills, orgs,
+        profilePicture: currentProfile.profilePicture
       };
 
-      try {
-        localStorage.setItem('studentProfileData', JSON.stringify(updatedProfile));
-      } catch (error) {
-        console.error('Unable to save profile:', error);
-        showMessage('The profile could not be saved. Please try again.', 'error');
-        return;
+      if (user) {
+        showMessage('Saving changes to Supabase database...', 'info');
+        const { error } = await supabase.from('profiles').upsert({
+          id: user.id,
+          full_name: fullName,
+          course: course,
+          year_level: yearLevel,
+          intro: intro,
+          about: about,
+          interests: interests,
+          education: education,
+          goals: goals,
+          skills: skills,
+          orgs: orgs
+        });
+
+        if (error) {
+          showMessage('Database Error: ' + error.message, 'error');
+          return;
+        }
       }
 
       currentProfile = updatedProfile;
       displayProfile(currentProfile);
-      showMessage('Profile saved successfully!', 'success');
+      showMessage('Profile updated successfully!', 'success');
 
       setTimeout(() => {
-        if (editProfileSection) {
-          editProfileSection.hidden = true;
-        }
+        if (editProfileSection) editProfileSection.setAttribute('hidden', 'true');
       }, 700);
     });
   }
@@ -529,9 +482,111 @@ document.addEventListener('DOMContentLoaded', () => {
     editProfileMessage.textContent = message;
     editProfileMessage.className = `form-message ${type}`;
   }
-});
 
-// Cordova ready event for safe plugin initialization
+  /* =====================================================
+     8. CORDOVA CAMERA & DATABASE PICTURE SAVE
+  ====================================================== */
+  const changeProfilePicture = document.getElementById('changeProfilePicture');
+  const avatarWrap = document.getElementById('avatarWrap');
+  const profileImg = document.getElementById('profileImg');
+
+  function takeProfilePicture() {
+    if (!navigator.camera || !window.Camera) {
+      alert('Camera plugin not detected. Please run on a Cordova device or emulator.');
+      return;
+    }
+
+    navigator.camera.getPicture(
+      async function onPhotoSuccess(imageData) {
+        if (!profileImg) return;
+        const imageSource = imageData.startsWith('data:') ? imageData : 'data:image/jpeg;base64,' + imageData;
+        profileImg.src = imageSource;
+        currentProfile.profilePicture = imageSource;
+
+        if (user) {
+          const { error } = await supabase
+            .from('profiles')
+            .upsert({ id: user.id, profile_picture: imageSource });
+
+          if (error) {
+            alert('Failed to save profile picture to database: ' + error.message);
+          } else {
+            alert('Profile picture saved!');
+          }
+        }
+      },
+      function onPhotoError(error) {
+        if (error && (error.toLowerCase().includes('cancel') || error === 'No Image Selected')) {
+          return;
+        }
+        console.error('Camera error:', error);
+      },
+      {
+        quality: 70,
+        destinationType: window.Camera.DestinationType.DATA_URL,
+        sourceType: window.Camera.PictureSourceType.CAMERA,
+        encodingType: window.Camera.EncodingType.JPEG,
+        mediaType: window.Camera.MediaType.PICTURE,
+        correctOrientation: true,
+        targetWidth: 500,
+        targetHeight: 500
+      }
+    );
+  }
+
+  if (changeProfilePicture) changeProfilePicture.addEventListener('click', takeProfilePicture);
+  if (avatarWrap) {
+    avatarWrap.addEventListener('click', takeProfilePicture);
+    avatarWrap.style.cursor = 'pointer';
+  }
+
+  /* =====================================================
+     9. DELETE RECORD & LOGOUT LISTENERS
+  ====================================================== */
+  const deleteProfileBtn = document.getElementById('deleteProfileBtn');
+  if (deleteProfileBtn) {
+    deleteProfileBtn.addEventListener('click', async (e) => {
+      e.preventDefault(); // Prevent default link/button action
+      
+      if (confirm('Are you sure you want to delete your profile record?')) {
+        try {
+          if (user) {
+            const { error } = await supabase.from('profiles').delete().eq('id', user.id);
+            if (error) throw error;
+            await supabase.auth.signOut();
+          }
+          alert('Profile deleted.');
+          window.location.href = '../Auth/Login.html';
+        } catch (err) {
+          alert('Delete failed: ' + err.message);
+        }
+      }
+    });
+  }
+
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault(); // <-- Prevents page from jumping before sign-out completes
+      
+      try {
+        await supabase.auth.signOut();
+        // Clear local session storage if any exists
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Redirect to Login page
+        window.location.href = '../Auth/Login.html';
+      } catch (err) {
+        console.error('Logout error:', err);
+        // Force redirect even if signout call throws a network error
+        window.location.href = '../Auth/Login.html';
+      }
+    });
+  }
+  }); // <-- Closes DOMContentLoaded listener
+
+// Cordova ready logging
 document.addEventListener('deviceready', () => {
-  console.log('Cordova device is ready. Camera plugin available.');
+  console.log('Cordova device ready. Camera available.');
 }, false);

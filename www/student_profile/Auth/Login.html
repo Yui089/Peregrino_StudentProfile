@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Portal — Login</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Work+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/index.css">
+
+<style>
+  .auth-container {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 24px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 12px; font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; }
+  .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+  .btn-primary { width: 100%; padding: 12px; background: var(--brass, #a37c3f); color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; }
+  .auth-toggle { text-align: center; margin-top: 16px; font-size: 13px; color: #666; cursor: pointer; text-decoration: underline; }
+  .error-msg { color: #d9534f; font-size: 13px; margin-bottom: 12px; display: none; }
+</style>
+</head>
+
+<body>
+<div class="page">
+  <div class="auth-container">
+    <h2 id="formTitle" style="font-family: 'Cormorant Garamond', serif; margin-top: 0;">Student Login</h2>
+    <div id="errorMsg" class="error-msg"></div>
+
+    <form id="authForm">
+      <div class="form-group" id="studentIdGroup" style="display: none;">
+        <label>STUDENT ID</label>
+        <input type="text" id="studentId" placeholder="e.g. 2022-1234">
+      </div>
+
+      <div class="form-group" id="fullNameGroup" style="display: none;">
+        <label>FULL NAME</label>
+        <input type="text" id="fullName" placeholder="e.g. Haiana Peregrino">
+      </div>
+
+      <div class="form-group">
+        <label>EMAIL ADDRESS</label>
+        <input type="email" id="email" required placeholder="student@xu.edu.ph">
+      </div>
+
+      <div class="form-group">
+        <label>PASSWORD</label>
+        <input type="password" id="password" required placeholder="••••••••">
+      </div>
+
+      <button type="submit" id="submitBtn" class="btn-primary">Sign In</button>
+    </form>
+
+    <div class="auth-toggle" id="toggleAuthMode">Need an account? Register (Create Profile)</div>
+  </div>
+</div>
+
+<!-- 1. Supabase SDK CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- 2. Supabase Initialization Config -->
+<script src="../../js/supabase-config.js"></script>
+
+<!-- 3. Form Authentication Script -->
+<script>
+  let isRegisterMode = false;
+  const authForm = document.getElementById('authForm');
+  const toggleBtn = document.getElementById('toggleAuthMode');
+  const errorMsg = document.getElementById('errorMsg');
+
+  toggleBtn.addEventListener('click', () => {
+    isRegisterMode = !isRegisterMode;
+    document.getElementById('formTitle').textContent = isRegisterMode ? 'Register Student Profile' : 'Student Login';
+    document.getElementById('submitBtn').textContent = isRegisterMode ? 'Create Account' : 'Sign In';
+    document.getElementById('studentIdGroup').style.display = isRegisterMode ? 'block' : 'none';
+    document.getElementById('fullNameGroup').style.display = isRegisterMode ? 'block' : 'none';
+    toggleBtn.textContent = isRegisterMode ? 'Already have an account? Sign In' : 'Need an account? Register (Create Profile)';
+  });
+
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorMsg.style.display = 'none';
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (!email || !password) {
+      showError('Please enter both email and password.');
+      return;
+    }
+
+    try {
+      if (isRegisterMode) {
+        // CRUD: CREATE (Register User + Insert Profile Row)
+        const studentId = document.getElementById('studentId').value.trim();
+        const fullName = document.getElementById('fullName').value.trim();
+
+        if (!studentId || !fullName) {
+          showError('Please fill in Student ID and Full Name.');
+          return;
+        }
+
+        const { data: authData, error: signUpError } = await supabase.auth.signUp({ email, password });
+        if (signUpError) throw signUpError;
+
+        if (authData.user) {
+          const { error: profileError } = await supabase.from('profiles').insert([{
+            id: authData.user.id,
+            student_id: studentId,
+            full_name: fullName,
+            course: 'BS Information Technology',
+            year_level: '3rd Year',
+            about: 'Welcome to my student profile!',
+            skills: ['Web Development', 'SQL', 'Data Analysis']
+          }]);
+          if (profileError) throw profileError;
+          alert('Registration successful! Logging you in...');
+          window.location.href = '../Homepage/Index.html';
+        }
+      } else {
+        // AUTHENTICATION: LOGIN
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+
+        window.location.href = '../Homepage/Index.html';
+      }
+    } catch (err) {
+      showError(err.message || 'Authentication failed. Please check your credentials.');
+    }
+  });
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.style.display = 'block';
+  }
+</script>
+</body>
+</html>
