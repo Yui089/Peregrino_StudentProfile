@@ -220,8 +220,8 @@ header h1, header h2,
   font-size: 22px;
   font-weight: 700;
   letter-spacing: 1.5px;
-  color: #f7f3ed !important;
-  margin: 0;
+  color: #f7f3ed !important; 
+  margin: 0; 
   text-transform: capitalize;
   display: flex;
   align-items: center;
@@ -264,8 +264,8 @@ header h1, header h2,
   text-align: center;
 }
 
-.tabbar a:hover {
-  background: rgba(51, 38, 30, 0.05);
+.tabbar a:hover { 
+  background: rgba(51, 38, 30, 0.05); 
 }
 
 .tabbar a.active {
@@ -1498,6 +1498,39 @@ footer .divider{
 
   .profile-skills .tag {
     font-size: 0.68rem;
+  }
+
+
+  /* Header: stack avatar above name, center everything, and shrink
+     the name so it fits on one line instead of wrapping. */
+  .header-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .identity {
+    align-items: center;
+    padding-bottom: 0;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  .profile-actions {
+    justify-content: center !important;
+    flex-wrap: nowrap;
+    margin-top: 10px;
+  }
+
+  .profile-actions .edit-profile-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 9px 10px;
+    font-size: 0.7rem;
+    text-align: center;
   }
 
 }
