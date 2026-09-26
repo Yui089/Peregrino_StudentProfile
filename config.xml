@@ -7,7 +7,8 @@
     <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
         Apache Cordova Team
     </author>
-    <content src="student_profile/Homepage/Index.html" />
+    <content src="student_profile/Login/Login.html" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
 </widget>
+ 

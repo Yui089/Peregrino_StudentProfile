@@ -1,68 +1,112 @@
 document.addEventListener('DOMContentLoaded', () => {
+
   const defaultProfile = {
-    intro:
-      '"He who plants a tree plants hope."\n\nWelcome to my little corner of the internet, where school projects, experiments, and ideas come together. Take a look around to see what I\'ve learned, what I\'ve built, and where I\'m headed next.\n\nMy time in IT has taken me through more than just programming. I\'ve explored web development, databases, networking, and mobile applications, each giving me a different perspective on what technology can do. Some projects have been smooth, while others have involved a lot of "why isn\'t this working?" moments.\n\nThis website brings those pieces together. You\'ll find a little bit of my work, the skills I\'m developing, and the direction I\'m exploring as I continue building my place in the world of IT.',
-    fullName: 'Haiana Peregrino',
-    course: 'Information Technology',
+    intro: 'Welcome to my little corner of the internet.',
+    fullName: 'Student',
+    course: 'BS Information Technology',
     yearLevel: '3rd Year',
-    about:
-      'I am a student of Information Technology whose interest in the field developed from a curiosity about how technology functions and how it can be applied to solve everyday problems. Throughout my studies, I have been introduced to web development, databases, networking, programming, and mobile application development.',
-    interests:
-      'Web Development — Working with HTML, CSS, and JavaScript to construct organized and responsive interfaces.\n\nDatabases — Studying MySQL and the methods by which information is stored, organized, and retrieved.\n\nUser Interface and Design — Attention to layout, spacing, consistency, and the overall experience of the user.\n\nNetworking — A developing understanding of how devices and networks communicate, which has clarified the infrastructure supporting the applications in common use.\n\nLearning Through Projects — A preference for acquiring knowledge through practical construction and the examination of how individual components function together.',
-    education:
-      'Bachelor of Science in Information Technology — Currently Pursuing\nA candidate for the degree of Bachelor of Science in Information Technology, with coursework encompassing programming, database management, networking, web development, mobile applications, and related areas of the discipline.\n\nSenior High School — Xavier University — Ateneo de Cagayan · 2022–2024\nCompleted a period of work immersion at A Brown Company Inc.',
-    goals:
-      'A professional objective of pursuing a career as a Data Analyst.',
-    skills: [
-      { name: 'Database Management', rating: 4 },
-      { name: 'Data Analysis', rating: 3 },
-      { name: 'SQL', rating: 4 },
-      { name: 'Web Development', rating: 4 },
-      { name: 'Data Visualization', rating: 3 },
-      { name: 'Problem Solving', rating: 4 },
-      { name: 'Computer & IT Fundamentals', rating: 4 },
-      { name: 'Responsive Design', rating: 3 }
-    ],
-    orgs: [
-      {
-        name: 'Ateneo Red Cross Youth (ARCY)',
-        description:
-          'A member of the Ateneo Red Cross Youth, taking part in campus outreach and volunteer initiatives that support first aid awareness and community service.',
-        images: '../../img/arcy1.jpg, ../../img/arcy2.jpg, ../../img/arcy3.jpg'
-      },
-      {
-        name: 'Xavier Circle of Information Technology Students (XCITeS)',
-        description:
-          'Treasurer for XCITeS, our student organization for computer enthusiasts, handling budgeting and liquidation reports for the org\'s projects and events.',
-        images: '../../img/org1.jpg, ../../img/org2.jpg, ../../img/org3.jpg'
-      }
-    ]
+    about: 'I am a student of Information Technology.',
+    interests: '',
+    education: '',
+    goals: '',
+    skills: [],
+    orgs: []
   };
 
+  let currentUserId = null;
+  let currentProfile = { ...defaultProfile };
+
+  const client = window.supabaseClient;
+
   /* =====================================================
-     GET SAVED PROFILE
+     AUTH GUARD
+     If nobody is signed in, send them to the login page
+     before anything else on this page runs.
   ====================================================== */
-  function getProfile() {
-    const savedProfile = localStorage.getItem('studentProfileData');
-    if (!savedProfile) return defaultProfile;
-
-    try {
-      const parsedProfile = JSON.parse(savedProfile);
-      const mergedProfile = { ...defaultProfile, ...parsedProfile };
-
-      if (!Array.isArray(mergedProfile.skills)) {
-        mergedProfile.skills = defaultProfile.skills;
-      }
-
-      if (!Array.isArray(mergedProfile.orgs)) {
-        mergedProfile.orgs = defaultProfile.orgs;
-      }
-
-      return mergedProfile;
-    } catch (error) {
-      console.error('Unable to read saved profile:', error);
-      return defaultProfile;
+  async function requireSession() {
+    if (!client || !client.auth) {
+      console.error('Supabase client is not available. Check that supabase-client.js loaded before index.js.');
+      return null;
     }
+
+    const { data, error } = await client.auth.getSession();
+    if (error) {
+      console.error('Unable to check the current session:', error);
+    }
+
+    if (!data || !data.session) {
+      window.location.href = '../Login/Login.html';
+      return null;
+    }
+
+    return data.session;
+  }
+
+  /* =====================================================
+     LOAD PROFILE FROM THE DATABASE
+  ====================================================== */
+  async function loadProfileFromDb(userId) {
+    const { data, error } = await client
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('Unable to load the profile:', error);
+      return { ...defaultProfile };
+    }
+
+    return {
+      intro: data.intro ?? defaultProfile.intro,
+      fullName: data.full_name ?? defaultProfile.fullName,
+      course: data.course ?? defaultProfile.course,
+      yearLevel: data.year_level ?? defaultProfile.yearLevel,
+      about: data.about ?? defaultProfile.about,
+      interests: data.interests ?? defaultProfile.interests,
+      education: data.education ?? defaultProfile.education,
+      goals: data.goals ?? defaultProfile.goals,
+      skills: Array.isArray(data.skills) ? data.skills : defaultProfile.skills,
+      orgs: Array.isArray(data.orgs) ? data.orgs : defaultProfile.orgs,
+      avatarData: data.avatar_data || null
+    };
+  }
+
+  /* =====================================================
+     SAVE PROFILE TO THE DATABASE
+     Only the fields the edit form actually owns are sent,
+     so the photo (saved separately) is never overwritten here.
+  ====================================================== */
+  async function saveProfileToDb(userId, profile) {
+    const { error } = await client.from('profiles').upsert({
+      id: userId,
+      full_name: profile.fullName,
+      course: profile.course,
+      year_level: profile.yearLevel,
+      intro: profile.intro,
+      about: profile.about,
+      interests: profile.interests,
+      education: profile.education,
+      goals: profile.goals,
+      skills: profile.skills,
+      orgs: profile.orgs,
+      updated_at: new Date().toISOString()
+    });
+
+    return error;
+  }
+
+  /* =====================================================
+     SAVE JUST THE PHOTO TO THE DATABASE
+  ====================================================== */
+  async function savePhotoToDb(userId, imageSource) {
+    const { error } = await client.from('profiles').upsert({
+      id: userId,
+      avatar_data: imageSource,
+      updated_at: new Date().toISOString()
+    });
+
+    return error;
   }
 
   /* =====================================================
@@ -187,11 +231,29 @@ document.addEventListener('DOMContentLoaded', () => {
   const changeProfilePicture = document.getElementById('changeProfilePicture');
   const avatarWrap = document.getElementById('avatarWrap');
   const profileImg = document.getElementById('profileImg');
-  const savedProfilePicture = localStorage.getItem('profilePicture');
+  const defaultPhotoSrc = profileImg ? profileImg.getAttribute('src') : '';
+  let usingCustomPhoto = false;
 
-  /* Load previously saved profile picture */
-  if (savedProfilePicture && profileImg) {
-    profileImg.src = savedProfilePicture;
+  if (profileImg) {
+    profileImg.addEventListener('load', () => {
+      if (avatarWrap) avatarWrap.classList.remove('no-photo');
+    });
+
+    profileImg.addEventListener('error', () => {
+      if (usingCustomPhoto) {
+        usingCustomPhoto = false;
+        profileImg.src = defaultPhotoSrc;
+      } else if (avatarWrap) {
+        avatarWrap.classList.add('no-photo');
+      }
+    });
+  }
+
+  function applySavedPhoto(avatarData) {
+    if (avatarData && profileImg) {
+      usingCustomPhoto = true;
+      profileImg.src = avatarData;
+    }
   }
 
   function takeProfilePicture() {
@@ -201,28 +263,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     navigator.camera.getPicture(
-      function onPhotoSuccess(imageData) {
+      async function onPhotoSuccess(imageData) {
         if (!profileImg) return;
-        const imageSource = imageData;
+        const imageSource = 'data:image/jpeg;base64,' + imageData;
         usingCustomPhoto = true;
         profileImg.src = imageSource;
 
-        try {
-          localStorage.setItem('profilePicture', imageSource);
-        } catch (error) {
-          console.error('Unable to save profile picture:', error);
+        if (!currentUserId) return;
+
+        const error = await savePhotoToDb(currentUserId, imageSource);
+        if (error) {
+          console.error('Unable to save the profile picture:', error);
           alert('The photo was captured, but it could not be saved. Please try again.');
         }
-      }
+      },
       function onPhotoError(error) {
-        if (error && (error.toLowerCase().includes('cancel') || error === 'No Image Selected')) {
+        const message = String(error || '').toLowerCase();
+        if (message.includes('cancel') || message === 'no image selected') {
           return;
         }
         console.error('Camera error:', error);
         alert('Unable to access the camera. Please try again.');
       },
       {
-        quality: 80,
+        quality: 70,
+        targetWidth: 600,
+        targetHeight: 600,
         destinationType: window.Camera.DestinationType.DATA_URL,
         sourceType: window.Camera.PictureSourceType.CAMERA,
         encodingType: window.Camera.EncodingType.JPEG,
@@ -233,15 +299,26 @@ document.addEventListener('DOMContentLoaded', () => {
     );
   }
 
-  // Allow clicking the button to change picture
   if (changeProfilePicture) {
     changeProfilePicture.addEventListener('click', takeProfilePicture);
   }
 
-  // Allow clicking the picture itself to change it
   if (avatarWrap) {
     avatarWrap.addEventListener('click', takeProfilePicture);
-    avatarWrap.style.cursor = 'pointer'; // Visual feedback
+    avatarWrap.style.cursor = 'pointer';
+  }
+
+  /* =====================================================
+     LOG OUT
+  ====================================================== */
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      if (client && client.auth) {
+        await client.auth.signOut();
+      }
+      window.location.href = '../Login/Login.html';
+    });
   }
 
   /* =====================================================
@@ -425,9 +502,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const editEducation = document.getElementById('editEducation');
   const editGoals = document.getElementById('editGoals');
 
-  let currentProfile = getProfile();
-  displayProfile(currentProfile);
-
   function fillEditForm(profile) {
     if (editIntro) editIntro.value = profile.intro;
     if (editFullName) editFullName.value = profile.fullName;
@@ -475,7 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
      SAVE FORM SUBMISSION WITH VALIDATION
   ====================================================== */
   if (editProfileForm) {
-    editProfileForm.addEventListener('submit', event => {
+    editProfileForm.addEventListener('submit', async event => {
       event.preventDefault();
 
       const intro = editIntro ? editIntro.value.trim() : '';
@@ -504,15 +578,19 @@ document.addEventListener('DOMContentLoaded', () => {
         intro, fullName, course, yearLevel, about, interests, education, goals, skills, orgs
       };
 
-      try {
-        localStorage.setItem('studentProfileData', JSON.stringify(updatedProfile));
-      } catch (error) {
+      if (!currentUserId) {
+        showMessage('You are not signed in. Please log in again.', 'error');
+        return;
+      }
+
+      const error = await saveProfileToDb(currentUserId, updatedProfile);
+      if (error) {
         console.error('Unable to save profile:', error);
         showMessage('The profile could not be saved. Please try again.', 'error');
         return;
       }
 
-      currentProfile = updatedProfile;
+      currentProfile = { ...currentProfile, ...updatedProfile };
       displayProfile(currentProfile);
       showMessage('Profile saved successfully!', 'success');
 
@@ -529,9 +607,18 @@ document.addEventListener('DOMContentLoaded', () => {
     editProfileMessage.textContent = message;
     editProfileMessage.className = `form-message ${type}`;
   }
-});
 
-// Cordova ready event for safe plugin initialization
-document.addEventListener('deviceready', () => {
-  console.log('Cordova device is ready. Camera plugin available.');
-}, false);
+  /* =====================================================
+     STARTUP
+  ====================================================== */
+  (async function init() {
+    const session = await requireSession();
+    if (!session) return; // already redirected to Login
+
+    currentUserId = session.user.id;
+    currentProfile = await loadProfileFromDb(currentUserId);
+
+    displayProfile(currentProfile);
+    applySavedPhoto(currentProfile.avatarData);
+  })();
+});

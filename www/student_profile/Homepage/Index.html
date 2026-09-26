@@ -54,13 +54,23 @@
         Information Technology Student · Xavier University — Ateneo de Cagayan
       </div>
 
-      <button
-        type="button"
-        id="editProfileBtn"
-        class="edit-profile-btn"
-      >
-        Edit Profile
-      </button>
+      <div class="profile-actions" style="justify-content: flex-start; margin-top: 14px;">
+        <button
+          type="button"
+          id="editProfileBtn"
+          class="edit-profile-btn"
+        >
+          Edit Profile
+        </button>
+
+        <button
+          type="button"
+          id="logoutBtn"
+          class="edit-profile-btn"
+        >
+          Log Out
+        </button>
+      </div>
 
     </div>
   </div>
@@ -376,7 +386,7 @@
         <h2>About Me</h2>
       </div>
 
-      <!-- Dynamically updated from localStorage -->
+      <!-- Dynamically updated from the database -->
       <p class="intro-text" id="profileAbout">
         I am a student of Information Technology whose interest in the
         field developed from a curiosity about how technology functions
@@ -584,7 +594,13 @@
 <!-- Cordova -->
 <script src="../../cordova.js"></script>
 
-<!-- Existing Activity 5 JavaScript -->
+<!-- 1. Load Supabase CDN library -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- 2. Shared client (URL and key live here) -->
+<script src="../../js/supabase-config.js"></script>
+
+<!-- 3. Homepage / profile logic -->
 <script src="../../js/index.js"></script>
 
 </body>
