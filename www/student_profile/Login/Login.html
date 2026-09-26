@@ -22,8 +22,10 @@
   .form-group label { display: block; font-size: 12px; font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; }
   .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
   .btn-primary { width: 100%; padding: 12px; background: var(--brass, #a37c3f); color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
   .auth-toggle { text-align: center; margin-top: 16px; font-size: 13px; color: #666; cursor: pointer; text-decoration: underline; }
   .error-msg { color: #d9534f; font-size: 13px; margin-bottom: 12px; display: none; }
+  .info-msg { color: #3F5C50; font-size: 13px; margin-bottom: 12px; display: none; }
 </style>
 </head>
 
@@ -32,6 +34,7 @@
   <div class="auth-container">
     <h2 id="formTitle" style="font-family: 'Cormorant Garamond', serif; margin-top: 0;">Student Login</h2>
     <div id="errorMsg" class="error-msg"></div>
+    <div id="infoMsg" class="info-msg"></div>
 
     <form id="authForm">
       <div class="form-group" id="studentIdGroup" style="display: none;">
@@ -61,42 +64,39 @@
   </div>
 </div>
 
-<!-- 1. Load Supabase CDN Library -->
+<!-- 1. Load Supabase CDN library -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- 2. Initialize Supabase Client -->
-<script>
-  // ⚠️ Ensure SUPABASE_URL has NO trailing slashes or subpaths (e.g. 'https://xyz.supabase.co')
-  const SUPABASE_URL = 'https://jlttlcgbgmueljlrgixu.supabase.co/';
-  const SUPABASE_ANON_KEY = 'sb_publishable_iHeCYxtjWuRjzqM41be9mA_iz89ZrGy';
+<!-- 2. Shared client (URL and key live here) -->
+<script src="../../js/supabase-config.js"></script>
 
-  window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
-
-<!-- 3. Form Authentication Logic -->
+<!-- 3. Form logic -->
 <script>
   let isRegisterMode = false;
   const authForm = document.getElementById('authForm');
   const toggleBtn = document.getElementById('toggleAuthMode');
   const errorMsg = document.getElementById('errorMsg');
+  const infoMsg = document.getElementById('infoMsg');
+  const submitBtn = document.getElementById('submitBtn');
 
   toggleBtn.addEventListener('click', () => {
     isRegisterMode = !isRegisterMode;
     document.getElementById('formTitle').textContent = isRegisterMode ? 'Register Student Profile' : 'Student Login';
-    document.getElementById('submitBtn').textContent = isRegisterMode ? 'Create Account' : 'Sign In';
+    submitBtn.textContent = isRegisterMode ? 'Create Account' : 'Sign In';
     document.getElementById('studentIdGroup').style.display = isRegisterMode ? 'block' : 'none';
     document.getElementById('fullNameGroup').style.display = isRegisterMode ? 'block' : 'none';
     toggleBtn.textContent = isRegisterMode ? 'Already have an account? Sign In' : 'Need an account? Register (Create Profile)';
+    hideMessages();
   });
 
   authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    errorMsg.style.display = 'none';
+    hideMessages();
 
     const client = window.supabaseClient;
 
     if (!client || !client.auth) {
-      showError('Supabase client failed to initialize. Check your URL and Key.');
+      showError('Supabase client failed to initialize. Check the URL and key in supabase-client.js.');
       return;
     }
 
@@ -108,6 +108,8 @@
       return;
     }
 
+    submitBtn.disabled = true;
+
     try {
       if (isRegisterMode) {
         const studentId = document.getElementById('studentId').value.trim();
@@ -115,48 +117,65 @@
 
         if (!studentId || !fullName) {
           showError('Please fill in Student ID and Full Name.');
+          submitBtn.disabled = false;
           return;
         }
 
-        // 1. Sign up user in Auth
-        const { data: authData, error: signUpError } = await client.auth.signUp({ email, password });
+        // Create the account. The student ID and full name travel as
+        // account metadata; a database trigger (see schema.sql) reads
+        // them and creates the matching profile row on its own, so this
+        // page never has to insert into profiles directly.
+        const { data: authData, error: signUpError } = await client.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              student_id: studentId,
+              full_name: fullName
+            }
+          }
+        });
         if (signUpError) throw signUpError;
+        if (!authData.user) throw new Error('Registration did not return a user. Please try again.');
 
-        // 2. Insert into public.profiles using EXACT table columns
-        if (authData.user) {
-          const { error: profileError } = await client.from('profiles').insert([{
-            id: authData.user.id,
-            student_id: studentId,
-            full_name: fullName,
-            course: 'BS Information Technology',
-            year_level: '3rd Year',
-            about: 'Welcome to my student profile!',
-            skills: [
-              { name: 'Database Management', rating: 4 },
-              { name: 'Web Development', rating: 4 }
-            ]
-          }]);
-
-          if (profileError) throw profileError;
-
-          alert('Registration successful! Logging you in...');
+        // Supabase can require email confirmation before a session
+        // exists. Only redirect if we actually got a session back.
+        if (authData.session) {
           window.location.href = '../Homepage/Index.html';
+        } else {
+          showInfo('Account created. Please check your email to confirm it, then sign in.');
+          isRegisterMode = false;
+          document.getElementById('formTitle').textContent = 'Student Login';
+          submitBtn.textContent = 'Sign In';
+          document.getElementById('studentIdGroup').style.display = 'none';
+          document.getElementById('fullNameGroup').style.display = 'none';
+          toggleBtn.textContent = 'Need an account? Register (Create Profile)';
         }
       } else {
-        // Sign in existing user
-        const { data, error } = await client.auth.signInWithPassword({ email, password });
+        const { error } = await client.auth.signInWithPassword({ email, password });
         if (error) throw error;
-
         window.location.href = '../Homepage/Index.html';
       }
     } catch (err) {
       showError(err.message || 'Authentication failed. Please check your credentials.');
+    } finally {
+      submitBtn.disabled = false;
     }
   });
 
   function showError(msg) {
     errorMsg.textContent = msg;
     errorMsg.style.display = 'block';
+  }
+
+  function showInfo(msg) {
+    infoMsg.textContent = msg;
+    infoMsg.style.display = 'block';
+  }
+
+  function hideMessages() {
+    errorMsg.style.display = 'none';
+    infoMsg.style.display = 'none';
   }
 </script>
 </body>

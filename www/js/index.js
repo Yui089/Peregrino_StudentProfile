@@ -1,61 +1,116 @@
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
 
-  /* =====================================================
-     1. DEFAULT PROFILE TEMPLATE & STORAGE KEYS
-  ====================================================== */
-  const defaultProfileTemplate = {
-    studentId: '2022-0000',
-    intro:
-      '"He who plants a tree plants hope."\n\nWelcome to my little corner of the internet, where school projects, experiments, and ideas come together. Take a look around to see what I\'ve learned, what I\'ve built, and where I\'m headed next.\n\nMy time in IT has taken me through more than just programming. I\'ve explored web development, databases, networking, and mobile applications, each giving me a different perspective on what technology can do. Some projects have been smooth, while others have involved a lot of "why isn\'t this working?" moments.\n\nThis website brings those pieces together. You\'ll find a little bit of my work, the skills I\'m developing, and the direction I\'m exploring as I continue building my place in the world of IT.',
-    fullName: 'Haiana Peregrino',
-    course: 'Information Technology',
+  const defaultProfile = {
+    intro: 'Welcome to my little corner of the internet.',
+    fullName: 'Student',
+    course: 'BS Information Technology',
     yearLevel: '3rd Year',
-    about:
-      'I am a student of Information Technology whose interest in the field developed from a curiosity about how technology functions and how it can be applied to solve everyday problems. Throughout my studies, I have been introduced to web development, databases, networking, programming, and mobile application development.',
-    interests:
-      'Web Development — Working with HTML, CSS, and JavaScript to construct organized and responsive interfaces.\n\nDatabases — Studying MySQL and the methods by which information is stored, organized, and retrieved.\n\nUser Interface and Design — Attention to layout, spacing, consistency, and the overall experience of the user.\n\nNetworking — A developing understanding of how devices and networks communicate, which has clarified the infrastructure supporting the applications in common use.\n\nLearning Through Projects — A preference for acquiring knowledge through practical construction and the examination of how individual components function together.',
-    education:
-      'Bachelor of Science in Information Technology — Currently Pursuing\nA candidate for the degree of Bachelor of Science in Information Technology, with coursework encompassing programming, database management, networking, web development, mobile applications, and related areas of the discipline.\n\nSenior High School — Xavier University — Ateneo de Cagayan · 2022–2024\nCompleted a period of work immersion at A Brown Company Inc.',
-    goals:
-      'A professional objective of pursuing a career as a Data Analyst.',
-    skills: [
-      { name: 'Database Management', rating: 4 },
-      { name: 'Data Analysis', rating: 3 },
-      { name: 'SQL', rating: 4 },
-      { name: 'Web Development', rating: 4 },
-      { name: 'Data Visualization', rating: 3 },
-      { name: 'Problem Solving', rating: 4 },
-      { name: 'Computer & IT Fundamentals', rating: 4 },
-      { name: 'Responsive Design', rating: 3 }
-    ],
-    orgs: [
-      {
-        name: 'Ateneo Red Cross Youth (ARCY)',
-        description:
-          'A member of the Ateneo Red Cross Youth, taking part in campus outreach and volunteer initiatives that support first aid awareness and community service.',
-        images: '../../img/arcy1.jpg, ../../img/arcy2.jpg, ../../img/arcy3.jpg'
-      },
-      {
-        name: 'Xavier Circle of Information Technology Students (XCITeS)',
-        description:
-          'Treasurer for XCITeS, our student organization for computer enthusiasts, handling budgeting and liquidation reports for the org\'s projects and events.',
-        images: '../../img/org1.jpg, ../../img/org2.jpg, ../../img/org3.jpg'
-      }
-    ]
+    about: 'I am a student of Information Technology.',
+    interests: '',
+    education: '',
+    goals: '',
+    skills: [],
+    orgs: []
   };
 
-  const STORAGE_KEY = 'userProfileData';
+  let currentUserId = null;
+  let currentProfile = { ...defaultProfile };
 
-  function getDefaultProfile() {
-    return JSON.parse(JSON.stringify(defaultProfileTemplate));
-  }
-
-  let currentProfile = getDefaultProfile();
-  let user = null;
-  const activeSupabase = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+  const client = window.supabaseClient;
 
   /* =====================================================
-     2. RENDERING FUNCTIONS
+     AUTH GUARD
+     If nobody is signed in, send them to the login page
+     before anything else on this page runs.
+  ====================================================== */
+  async function requireSession() {
+    if (!client || !client.auth) {
+      console.error('Supabase client is not available. Check that supabase-client.js loaded before index.js.');
+      return null;
+    }
+
+    const { data, error } = await client.auth.getSession();
+    if (error) {
+      console.error('Unable to check the current session:', error);
+    }
+
+    if (!data || !data.session) {
+      window.location.href = '../Login/Login.html';
+      return null;
+    }
+
+    return data.session;
+  }
+
+  /* =====================================================
+     LOAD PROFILE FROM THE DATABASE
+  ====================================================== */
+  async function loadProfileFromDb(userId) {
+    const { data, error } = await client
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('Unable to load the profile:', error);
+      return { ...defaultProfile };
+    }
+
+    return {
+      intro: data.intro ?? defaultProfile.intro,
+      fullName: data.full_name ?? defaultProfile.fullName,
+      course: data.course ?? defaultProfile.course,
+      yearLevel: data.year_level ?? defaultProfile.yearLevel,
+      about: data.about ?? defaultProfile.about,
+      interests: data.interests ?? defaultProfile.interests,
+      education: data.education ?? defaultProfile.education,
+      goals: data.goals ?? defaultProfile.goals,
+      skills: Array.isArray(data.skills) ? data.skills : defaultProfile.skills,
+      orgs: Array.isArray(data.orgs) ? data.orgs : defaultProfile.orgs,
+      avatarData: data.avatar_data || null
+    };
+  }
+
+  /* =====================================================
+     SAVE PROFILE TO THE DATABASE
+     Only the fields the edit form actually owns are sent,
+     so the photo (saved separately) is never overwritten here.
+  ====================================================== */
+  async function saveProfileToDb(userId, profile) {
+    const { error } = await client.from('profiles').upsert({
+      id: userId,
+      full_name: profile.fullName,
+      course: profile.course,
+      year_level: profile.yearLevel,
+      intro: profile.intro,
+      about: profile.about,
+      interests: profile.interests,
+      education: profile.education,
+      goals: profile.goals,
+      skills: profile.skills,
+      orgs: profile.orgs,
+      updated_at: new Date().toISOString()
+    });
+
+    return error;
+  }
+
+  /* =====================================================
+     SAVE JUST THE PHOTO TO THE DATABASE
+  ====================================================== */
+  async function savePhotoToDb(userId, imageSource) {
+    const { error } = await client.from('profiles').upsert({
+      id: userId,
+      avatar_data: imageSource,
+      updated_at: new Date().toISOString()
+    });
+
+    return error;
+  }
+
+  /* =====================================================
+     STAR RENDERING HELPER
   ====================================================== */
   function starsForRating(rating) {
     let stars = '';
@@ -65,12 +120,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     return stars;
   }
 
+  /* =====================================================
+     DISPLAY PROFILE INFORMATION
+  ====================================================== */
   function displayProfile(profile) {
-    if (!profile) return;
-
     const profileIntro = document.getElementById('profileIntro');
     const profileName = document.getElementById('profileName');
-    const profileStudentId = document.getElementById('profileStudentId');
     const profileCourseYear = document.getElementById('profileCourseYear');
     const profileAbout = document.getElementById('profileAbout');
     const profileInterests = document.getElementById('profileInterests');
@@ -79,41 +134,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     const profileSkills = document.getElementById('profileSkills');
     const profileSkillsList = document.getElementById('profileSkillsList');
     const profileOrgsList = document.getElementById('profileOrgsList');
-    const profileImg = document.getElementById('profileImg');
 
-    if (profile.profilePicture && profileImg) {
-      profileImg.src = profile.profilePicture;
-    }
-
-    if (profileIntro) profileIntro.textContent = profile.intro || '';
-    if (profileName) profileName.textContent = profile.fullName || '';
-    if (profileStudentId) profileStudentId.textContent = profile.studentId || '';
+    if (profileIntro) profileIntro.textContent = profile.intro;
+    if (profileName) profileName.textContent = profile.fullName;
 
     if (profileCourseYear) {
       profileCourseYear.textContent =
-        `${profile.course || ''} · ${profile.yearLevel || ''} · Xavier University — Ateneo de Cagayan`;
+        `${profile.course} · ${profile.yearLevel} · Xavier University — Ateneo de Cagayan`;
     }
 
-    if (profileAbout) profileAbout.textContent = profile.about || '';
-    if (profileInterests) profileInterests.textContent = profile.interests || '';
-    if (profileEducation) profileEducation.textContent = profile.education || '';
-    if (profileGoals) profileGoals.textContent = profile.goals || '';
+    if (profileAbout) profileAbout.textContent = profile.about;
+    if (profileInterests) profileInterests.textContent = profile.interests;
+    if (profileEducation) profileEducation.textContent = profile.education;
+    if (profileGoals) profileGoals.textContent = profile.goals;
 
-    /* SKILLS: Tag Cloud */
+    /* SKILLS: Tag List */
     if (profileSkills) {
       profileSkills.innerHTML = '';
-      (profile.skills || []).forEach(skill => {
+      profile.skills.forEach(skill => {
         const skillTag = document.createElement('span');
         skillTag.className = 'tag';
-        skillTag.textContent = typeof skill === 'string' ? skill : skill.name;
+        skillTag.textContent = skill.name;
         profileSkills.appendChild(skillTag);
       });
     }
 
-    /* SKILLS: Star List */
+    /* SKILLS: Detailed List */
     if (profileSkillsList) {
       profileSkillsList.innerHTML = '';
-      (profile.skills || []).forEach(skill => {
+      profile.skills.forEach(skill => {
         const row = document.createElement('div');
         row.className = 'skill';
 
@@ -126,11 +175,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const name = document.createElement('span');
         name.className = 'name';
-        name.textContent = typeof skill === 'string' ? skill : skill.name;
+        name.textContent = skill.name;
 
         const stars = document.createElement('span');
         stars.className = 'star-rating';
-        stars.textContent = starsForRating(typeof skill === 'object' ? (skill.rating || 3) : 3);
+        stars.textContent = starsForRating(skill.rating);
 
         body.appendChild(name);
         body.appendChild(stars);
@@ -140,7 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
 
-    /* ORGANIZATIONS */
+    /* ORGANIZATIONS / COMMUNITY INVOLVEMENT */
     if (profileOrgsList) {
       profileOrgsList.innerHTML = '';
       (profile.orgs || []).forEach(org => {
@@ -148,10 +197,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         article.className = 'org';
 
         const h3 = document.createElement('h3');
-        h3.textContent = org.name || '';
+        h3.textContent = org.name;
 
         const p = document.createElement('p');
-        p.textContent = org.description || '';
+        p.textContent = org.description;
 
         article.appendChild(h3);
         article.appendChild(p);
@@ -165,7 +214,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (imgSrc) {
               const img = document.createElement('img');
               img.src = imgSrc;
-              img.alt = `${org.name || 'Organization'} photo`;
+              img.alt = `${org.name} photo`;
               gallery.appendChild(img);
             }
           });
@@ -177,7 +226,169 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /* =====================================================
-     3. EDITORS (SKILLS & ORGANIZATIONS)
+     CAMERA / PROFILE PICTURE
+  ====================================================== */
+  const changeProfilePicture = document.getElementById('changeProfilePicture');
+  const avatarWrap = document.getElementById('avatarWrap');
+  const profileImg = document.getElementById('profileImg');
+  const defaultPhotoSrc = profileImg ? profileImg.getAttribute('src') : '';
+  let usingCustomPhoto = false;
+
+  if (profileImg) {
+    profileImg.addEventListener('load', () => {
+      if (avatarWrap) avatarWrap.classList.remove('no-photo');
+    });
+
+    profileImg.addEventListener('error', () => {
+      if (usingCustomPhoto) {
+        usingCustomPhoto = false;
+        profileImg.src = defaultPhotoSrc;
+      } else if (avatarWrap) {
+        avatarWrap.classList.add('no-photo');
+      }
+    });
+  }
+
+  function applySavedPhoto(avatarData) {
+    if (avatarData && profileImg) {
+      usingCustomPhoto = true;
+      profileImg.src = avatarData;
+    }
+  }
+
+  function takeProfilePicture() {
+    if (!navigator.camera || !window.Camera) {
+      alert('Camera plugin not detected. Please run the app on a Cordova device or emulator with cordova-plugin-camera installed.');
+      return;
+    }
+
+    navigator.camera.getPicture(
+      async function onPhotoSuccess(imageData) {
+        if (!profileImg) return;
+        const imageSource = 'data:image/jpeg;base64,' + imageData;
+        usingCustomPhoto = true;
+        profileImg.src = imageSource;
+
+        if (!currentUserId) return;
+
+        const error = await savePhotoToDb(currentUserId, imageSource);
+        if (error) {
+          console.error('Unable to save the profile picture:', error);
+          alert('The photo was captured, but it could not be saved. Please try again.');
+        }
+      },
+      function onPhotoError(error) {
+        const message = String(error || '').toLowerCase();
+        if (message.includes('cancel') || message === 'no image selected') {
+          return;
+        }
+        console.error('Camera error:', error);
+        alert('Unable to access the camera. Please try again.');
+      },
+      {
+        quality: 70,
+        targetWidth: 600,
+        targetHeight: 600,
+        destinationType: window.Camera.DestinationType.DATA_URL,
+        sourceType: window.Camera.PictureSourceType.CAMERA,
+        encodingType: window.Camera.EncodingType.JPEG,
+        mediaType: window.Camera.MediaType.PICTURE,
+        correctOrientation: true,
+        saveToPhotoAlbum: false
+      }
+    );
+  }
+
+  if (changeProfilePicture) {
+    changeProfilePicture.addEventListener('click', takeProfilePicture);
+  }
+
+  if (avatarWrap) {
+    avatarWrap.addEventListener('click', takeProfilePicture);
+    avatarWrap.style.cursor = 'pointer';
+  }
+
+  /* =====================================================
+     LOG OUT
+  ====================================================== */
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      if (client && client.auth) {
+        await client.auth.signOut();
+      }
+      window.location.href = '../Login/Login.html';
+    });
+  }
+
+  /* =====================================================
+     ORGANIZATIONS EDITOR (ADD / REMOVE ORGS)
+  ====================================================== */
+  const orgsEditor = document.getElementById('orgsEditor');
+  const addOrgBtn = document.getElementById('addOrgBtn');
+
+  function createOrgRow(name = '', description = '', images = '') {
+    const card = document.createElement('div');
+    card.className = 'org-edit-card';
+
+    card.innerHTML = `
+      <div class="org-edit-header">
+        <label>Organization Name</label>
+        <button type="button" class="remove-skill-btn remove-org-btn" aria-label="Remove organization">✕</button>
+      </div>
+      <input type="text" class="org-name-input" value="${name}" placeholder="e.g. Ateneo Red Cross Youth (ARCY)">
+      
+      <label style="margin-top: 10px;">Description</label>
+      <textarea class="org-desc-input" rows="3" placeholder="Describe your involvement or responsibilities...">${description}</textarea>
+      
+      <label style="margin-top: 10px;">Image URLs / Paths (comma-separated)</label>
+      <input type="text" class="org-images-input" value="${images}" placeholder="../../img/org1.jpg, ../../img/org2.jpg">
+    `;
+
+    card.querySelector('.remove-org-btn').addEventListener('click', () => {
+      card.remove();
+    });
+
+    return card;
+  }
+
+  function fillOrgsEditor(orgs) {
+    if (!orgsEditor) return;
+    orgsEditor.innerHTML = '';
+    (orgs || []).forEach(org => {
+      orgsEditor.appendChild(createOrgRow(org.name, org.description, org.images));
+    });
+  }
+
+  if (addOrgBtn && orgsEditor) {
+    addOrgBtn.addEventListener('click', () => {
+      const row = createOrgRow('', '', '');
+      orgsEditor.appendChild(row);
+      const input = row.querySelector('.org-name-input');
+      if (input) input.focus();
+    });
+  }
+
+  function collectOrgsFromEditor() {
+    if (!orgsEditor) return [];
+    const rows = orgsEditor.querySelectorAll('.org-edit-card');
+    const orgs = [];
+
+    rows.forEach(row => {
+      const name = row.querySelector('.org-name-input').value.trim();
+      const description = row.querySelector('.org-desc-input').value.trim();
+      const images = row.querySelector('.org-images-input').value.trim();
+
+      if (name !== '') {
+        orgs.push({ name, description, images });
+      }
+    });
+
+    return orgs;
+  }
+
+  /* =====================================================
+     SKILLS EDITOR
   ====================================================== */
   const skillsEditor = document.getElementById('skillsEditor');
   const addSkillBtn = document.getElementById('addSkillBtn');
@@ -242,9 +453,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!skillsEditor) return;
     skillsEditor.innerHTML = '';
     (skills || []).forEach(skill => {
-      const skillName = typeof skill === 'string' ? skill : skill.name;
-      const skillRating = typeof skill === 'string' ? 3 : (skill.rating || 3);
-      skillsEditor.appendChild(createSkillRow(skillName, skillRating));
+      skillsEditor.appendChild(createSkillRow(skill.name, skill.rating));
     });
   }
 
@@ -275,72 +484,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     return skills;
   }
 
-  const orgsEditor = document.getElementById('orgsEditor');
-  const addOrgBtn = document.getElementById('addOrgBtn');
-
-  function createOrgRow(name = '', description = '', images = '') {
-    const card = document.createElement('div');
-    card.className = 'org-edit-card';
-
-    card.innerHTML = `
-      <div class="org-edit-header">
-        <label>Organization Name</label>
-        <button type="button" class="remove-skill-btn remove-org-btn" aria-label="Remove organization">✕</button>
-      </div>
-      <input type="text" class="org-name-input" value="${name}" placeholder="e.g. Ateneo Red Cross Youth (ARCY)">
-      
-      <label style="margin-top: 10px;">Description</label>
-      <textarea class="org-desc-input" rows="3" placeholder="Describe your involvement or responsibilities...">${description}</textarea>
-      
-      <label style="margin-top: 10px;">Image URLs / Paths (comma-separated)</label>
-      <input type="text" class="org-images-input" value="${images}" placeholder="../../img/org1.jpg, ../../img/org2.jpg">
-    `;
-
-    card.querySelector('.remove-org-btn').addEventListener('click', () => card.remove());
-    return card;
-  }
-
-  function fillOrgsEditor(orgs) {
-    if (!orgsEditor) return;
-    orgsEditor.innerHTML = '';
-    (orgs || []).forEach(org => {
-      orgsEditor.appendChild(createOrgRow(org.name, org.description, org.images));
-    });
-  }
-
-  if (addOrgBtn && orgsEditor) {
-    addOrgBtn.addEventListener('click', () => {
-      const row = createOrgRow('', '', '');
-      orgsEditor.appendChild(row);
-      const input = row.querySelector('.org-name-input');
-      if (input) input.focus();
-    });
-  }
-
-  function collectOrgsFromEditor() {
-    if (!orgsEditor) return [];
-    const rows = orgsEditor.querySelectorAll('.org-edit-card');
-    const orgs = [];
-
-    rows.forEach(row => {
-      const nameEl = row.querySelector('.org-name-input');
-      const descEl = row.querySelector('.org-desc-input');
-      const imgEl = row.querySelector('.org-images-input');
-
-      const name = nameEl ? nameEl.value.trim() : '';
-      const description = descEl ? descEl.value.trim() : '';
-      const images = imgEl ? imgEl.value.trim() : '';
-
-      if (name !== '') {
-        orgs.push({ name, description, images });
-      }
-    });
-
-    return orgs;
-  }
-
   /* =====================================================
-     4. FORM DOM CONTROLS
+     EDIT FORM POPULATION & EVENT LISTENERS
   ====================================================== */
   const editProfileBtn = document.getElementById('editProfileBtn');
   const editProfileSection = document.getElementById('editProfileSection');
@@ -348,7 +493,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const cancelEditBtn = document.getElementById('cancelEditBtn');
   const editProfileMessage = document.getElementById('editProfileMessage');
 
-  const editStudentId = document.getElementById('editStudentId');
   const editIntro = document.getElementById('editIntro');
   const editFullName = document.getElementById('editFullName');
   const editCourse = document.getElementById('editCourse');
@@ -359,273 +503,122 @@ document.addEventListener('DOMContentLoaded', async () => {
   const editGoals = document.getElementById('editGoals');
 
   function fillEditForm(profile) {
-    if (editStudentId) editStudentId.value = profile.studentId || '';
-    if (editIntro) editIntro.value = profile.intro || '';
-    if (editFullName) editFullName.value = profile.fullName || '';
-    if (editCourse) editCourse.value = profile.course || '';
-    if (editYearLevel) editYearLevel.value = profile.yearLevel || '';
-    if (editAbout) editAbout.value = profile.about || '';
-    if (editInterests) editInterests.value = profile.interests || '';
-    if (editEducation) editEducation.value = profile.education || '';
-    if (editGoals) editGoals.value = profile.goals || '';
+    if (editIntro) editIntro.value = profile.intro;
+    if (editFullName) editFullName.value = profile.fullName;
+    if (editCourse) editCourse.value = profile.course;
+    if (editYearLevel) editYearLevel.value = profile.yearLevel;
+    if (editAbout) editAbout.value = profile.about;
+    if (editInterests) editInterests.value = profile.interests;
+    if (editEducation) editEducation.value = profile.education;
+    if (editGoals) editGoals.value = profile.goals;
 
     fillSkillsEditor(profile.skills);
     fillOrgsEditor(profile.orgs);
   }
 
+  function openEditProfile() {
+    if (!editProfileBtn || !editProfileSection) return;
+
+    fillEditForm(currentProfile);
+
+    if (editProfileMessage) {
+      editProfileMessage.textContent = '';
+      editProfileMessage.className = 'form-message';
+    }
+
+    editProfileSection.hidden = false;
+    editProfileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   if (editProfileBtn && editProfileSection) {
-    editProfileBtn.addEventListener('click', () => {
+    editProfileBtn.addEventListener('click', openEditProfile);
+  }
+
+  if (cancelEditBtn && editProfileSection) {
+    cancelEditBtn.addEventListener('click', () => {
       fillEditForm(currentProfile);
       if (editProfileMessage) {
         editProfileMessage.textContent = '';
         editProfileMessage.className = 'form-message';
       }
-      editProfileSection.removeAttribute('hidden');
-      editProfileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  }
-
-  if (cancelEditBtn && editProfileSection) {
-    cancelEditBtn.addEventListener('click', () => {
-      editProfileSection.setAttribute('hidden', 'true');
+      editProfileSection.hidden = true;
     });
   }
 
   /* =====================================================
-     5. INITIAL DATA LOAD (LOCAL FIRST + SUPABASE)
-  ====================================================== */
-  function loadLocalCache() {
-    const cached = localStorage.getItem(STORAGE_KEY);
-    if (cached) {
-      try {
-        return { ...getDefaultProfile(), ...JSON.parse(cached) };
-      } catch (e) {
-        console.warn('Cache parse error');
-      }
-    }
-    return getDefaultProfile();
-  }
-
-  currentProfile = loadLocalCache();
-  displayProfile(currentProfile);
-
-  async function loadDatabaseProfile() {
-    if (!activeSupabase) return;
-
-    try {
-      const { data: sessionData } = await activeSupabase.auth.getSession();
-      user = sessionData?.session?.user || null;
-
-      if (!user) {
-        const userResp = await activeSupabase.auth.getUser();
-        user = userResp.data?.user || null;
-      }
-
-      if (user && user.id) {
-        const { data: dbData, error } = await activeSupabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        if (!error && dbData) {
-          currentProfile = {
-            studentId: dbData.student_id || currentProfile.studentId,
-            fullName: dbData.full_name || currentProfile.fullName,
-            course: dbData.course || currentProfile.course,
-            yearLevel: dbData.year_level || currentProfile.yearLevel,
-            about: dbData.about || currentProfile.about,
-            intro: dbData.intro || currentProfile.intro,
-            interests: dbData.interests || currentProfile.interests,
-            education: dbData.education || currentProfile.education,
-            goals: dbData.goals || currentProfile.goals,
-            skills: (Array.isArray(dbData.skills) && dbData.skills.length > 0) ? dbData.skills : currentProfile.skills,
-            orgs: (Array.isArray(dbData.orgs) && dbData.orgs.length > 0) ? dbData.orgs : currentProfile.orgs,
-            profilePicture: dbData.profile_picture || currentProfile.profilePicture
-          };
-
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(currentProfile));
-          displayProfile(currentProfile);
-        }
-      }
-    } catch (err) {
-      console.warn('Background db fetch notice:', err);
-    }
-  }
-
-  loadDatabaseProfile();
-
-
-  /* =====================================================
-     6. INSTANT & OPTIMIZED SAVE (NON-BLOCKING)
+     SAVE FORM SUBMISSION WITH VALIDATION
   ====================================================== */
   if (editProfileForm) {
     editProfileForm.addEventListener('submit', async event => {
       event.preventDefault();
 
-      // Extract form values instantly
-      const studentId = editStudentId ? editStudentId.value.trim() : (currentProfile.studentId || '');
-      const intro = editIntro ? editIntro.value.trim() : (currentProfile.intro || '');
-      const fullName = editFullName ? editFullName.value.trim() : (currentProfile.fullName || '');
-      const course = editCourse ? editCourse.value.trim() : (currentProfile.course || '');
-      const yearLevel = editYearLevel ? editYearLevel.value.trim() : (currentProfile.yearLevel || '');
-      const about = editAbout ? editAbout.value.trim() : (currentProfile.about || '');
-      const interests = editInterests ? editInterests.value.trim() : (currentProfile.interests || '');
-      const education = editEducation ? editEducation.value.trim() : (currentProfile.education || '');
-      const goals = editGoals ? editGoals.value.trim() : (currentProfile.goals || '');
+      const intro = editIntro ? editIntro.value.trim() : '';
+      const fullName = editFullName ? editFullName.value.trim() : '';
+      const course = editCourse ? editCourse.value.trim() : '';
+      const yearLevel = editYearLevel ? editYearLevel.value.trim() : '';
+      const about = editAbout ? editAbout.value.trim() : '';
+      const interests = editInterests ? editInterests.value.trim() : '';
+      const education = editEducation ? editEducation.value.trim() : '';
+      const goals = editGoals ? editGoals.value.trim() : '';
 
       const skills = collectSkillsFromEditor();
       const orgs = collectOrgsFromEditor();
 
+      if (!intro) { showMessage('Please enter your Introduction.', 'error'); return; }
+      if (!fullName) { showMessage('Please enter your Full Name.', 'error'); return; }
+      if (!course) { showMessage('Please enter your Course.', 'error'); return; }
+      if (!yearLevel) { showMessage('Please enter your Year Level.', 'error'); return; }
+      if (!about) { showMessage('Please enter your About Me information.', 'error'); return; }
+      if (!interests) { showMessage('Please enter your Interests.', 'error'); return; }
+      if (!education) { showMessage('Please enter your Educational Background.', 'error'); return; }
+      if (!goals) { showMessage('Please enter your Goals & Aspirations.', 'error'); return; }
+      if (skills.length === 0) { showMessage('Please add at least one skill.', 'error'); return; }
+
       const updatedProfile = {
-        studentId, intro, fullName, course, yearLevel, about, interests, education, goals, skills, orgs,
-        profilePicture: currentProfile.profilePicture
+        intro, fullName, course, yearLevel, about, interests, education, goals, skills, orgs
       };
 
-      // 1. INSTANT UI & CACHE UPDATE (Zero Delay)
-      currentProfile = updatedProfile;
+      if (!currentUserId) {
+        showMessage('You are not signed in. Please log in again.', 'error');
+        return;
+      }
+
+      const error = await saveProfileToDb(currentUserId, updatedProfile);
+      if (error) {
+        console.error('Unable to save profile:', error);
+        showMessage('The profile could not be saved. Please try again.', 'error');
+        return;
+      }
+
+      currentProfile = { ...currentProfile, ...updatedProfile };
       displayProfile(currentProfile);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProfile));
+      showMessage('Profile saved successfully!', 'success');
 
-      // 2. IMMEDIATE FEEDBACK & CLOSE MODAL RIGHT AWAY
-      showMessage('Saved!', 'success');
-      if (editProfileSection) {
-        setTimeout(() => editProfileSection.setAttribute('hidden', 'true'), 300);
-      }
-
-      // 3. BACKGROUND DATABASE SYNC (Runs in background without making user wait)
-      if (activeSupabase) {
-        (async () => {
-          try {
-            // Use existing user object or fetch once if null
-            const activeUser = user || (await activeSupabase.auth.getUser()).data?.user;
-            if (!activeUser || !activeUser.id) return;
-
-            const dbPayload = {
-              id: activeUser.id,
-              student_id: studentId,
-              full_name: fullName,
-              course: course,
-              year_level: yearLevel,
-              about: about,
-              intro: intro,
-              interests: interests,
-              education: education,
-              goals: goals,
-              skills: skills,
-              orgs: orgs,
-              updated_at: new Date().toISOString()
-            };
-
-            // Send payload silently
-            const { error } = await activeSupabase
-              .from('profiles')
-              .upsert(dbPayload, { onConflict: 'id' });
-
-            if (error) console.error('Background sync database error:', error.message);
-          } catch (err) {
-            console.warn('Background sync failed (saved locally):', err);
-          }
-        })();
-      }
+      setTimeout(() => {
+        if (editProfileSection) {
+          editProfileSection.hidden = true;
+        }
+      }, 700);
     });
   }
-  /* =====================================================
-     7. CORDOVA CAMERA & PHOTO SAVE
-  ====================================================== */
-  const changeProfilePicture = document.getElementById('changeProfilePicture');
-  const avatarWrap = document.getElementById('avatarWrap');
-  const profileImg = document.getElementById('profileImg');
 
-  function takeProfilePicture() {
-    if (!navigator.camera || !window.Camera) {
-      alert('Camera plugin not detected. Please run on a Cordova device or emulator.');
-      return;
-    }
-
-    navigator.camera.getPicture(
-      async function onPhotoSuccess(imageData) {
-        if (!profileImg) return;
-        const imageSource = imageData.startsWith('data:') ? imageData : 'data:image/jpeg;base64,' + imageData;
-        profileImg.src = imageSource;
-        currentProfile.profilePicture = imageSource;
-
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(currentProfile));
-
-        if (user && user.id && activeSupabase) {
-          try {
-            await activeSupabase
-              .from('profiles')
-              .upsert({ id: user.id, profile_picture: imageSource, updated_at: new Date().toISOString() }, { onConflict: 'id' });
-          } catch (e) {
-            console.warn('Photo database push error:', e);
-          }
-        }
-      },
-      function onPhotoError(error) {
-        if (error && (error.toLowerCase().includes('cancel') || error === 'No Image Selected')) {
-          return;
-        }
-        console.error('Camera error:', error);
-      },
-      {
-        quality: 70,
-        destinationType: window.Camera.DestinationType.DATA_URL,
-        sourceType: window.Camera.PictureSourceType.CAMERA,
-        encodingType: window.Camera.EncodingType.JPEG,
-        mediaType: window.Camera.MediaType.PICTURE,
-        correctOrientation: true,
-        targetWidth: 500,
-        targetHeight: 500
-      }
-    );
-  }
-
-  if (changeProfilePicture) changeProfilePicture.addEventListener('click', takeProfilePicture);
-  if (avatarWrap) {
-    avatarWrap.addEventListener('click', takeProfilePicture);
-    avatarWrap.style.cursor = 'pointer';
+  function showMessage(message, type) {
+    if (!editProfileMessage) return;
+    editProfileMessage.textContent = message;
+    editProfileMessage.className = `form-message ${type}`;
   }
 
   /* =====================================================
-     8. LOGOUT & DELETE RECORD
+     STARTUP
   ====================================================== */
-  const deleteProfileBtn = document.getElementById('deleteProfileBtn');
-  if (deleteProfileBtn) {
-    deleteProfileBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      
-      if (confirm('Are you sure you want to delete your profile record?')) {
-        try {
-          if (user && user.id && activeSupabase) {
-            await activeSupabase.from('profiles').delete().eq('id', user.id);
-          }
-          localStorage.removeItem(STORAGE_KEY);
-          if (activeSupabase) await activeSupabase.auth.signOut();
-          alert('Profile deleted.');
-          window.location.href = '../Auth/Login.html';
-        } catch (err) {
-          alert('Delete failed: ' + err.message);
-        }
-      }
-    });
-  }
+  (async function init() {
+    const session = await requireSession();
+    if (!session) return; // already redirected to Login
 
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      
-      try {
-        if (activeSupabase) {
-          await activeSupabase.auth.signOut();
-        }
-        sessionStorage.clear();
-        window.location.href = '../Auth/Login.html';
-      } catch (err) {
-        console.error('Logout error:', err);
-        window.location.href = '../Auth/Login.html';
-      }
-    });
-  }
+    currentUserId = session.user.id;
+    currentProfile = await loadProfileFromDb(currentUserId);
+
+    displayProfile(currentProfile);
+    applySavedPhoto(currentProfile.avatarData);
+  })();
 });

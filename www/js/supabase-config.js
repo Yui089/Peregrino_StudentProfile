@@ -1,8 +1,7 @@
 // js/supabase-config.js
 
 // Replace these placeholders with your actual Supabase credentials
-const SUPABASE_URL = 'https://jlttlcgbgmueljlrgixu.supabase.co/';
-const SUPABASE_ANON_KEY = 'sb_publishable_iHeCYxtjWuRjzqM41be9mA_iz89ZrGy';
+const SUPABASE_URL = 'https://xtlxnlsklzxjizvsaicr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_UQ0PRiatPEi_m8lk7bLylQ_2n6aP_gh';
 
-// Initializes the Supabase client and makes `supabase` available globally
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
