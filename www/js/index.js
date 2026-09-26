@@ -1,9 +1,10 @@
 document.addEventListener('DOMContentLoaded', async () => {
 
   /* =====================================================
-     1. DEFAULT PROFILE FALLBACK DATA
+     1. DEFAULT PROFILE TEMPLATE & STORAGE KEYS
   ====================================================== */
-  const defaultProfile = {
+  const defaultProfileTemplate = {
+    studentId: '2022-0000',
     intro:
       '"He who plants a tree plants hope."\n\nWelcome to my little corner of the internet, where school projects, experiments, and ideas come together. Take a look around to see what I\'ve learned, what I\'ve built, and where I\'m headed next.\n\nMy time in IT has taken me through more than just programming. I\'ve explored web development, databases, networking, and mobile applications, each giving me a different perspective on what technology can do. Some projects have been smooth, while others have involved a lot of "why isn\'t this working?" moments.\n\nThis website brings those pieces together. You\'ll find a little bit of my work, the skills I\'m developing, and the direction I\'m exploring as I continue building my place in the world of IT.',
     fullName: 'Haiana Peregrino',
@@ -43,8 +44,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     ]
   };
 
+  const STORAGE_KEY = 'userProfileData';
+
+  function getDefaultProfile() {
+    return JSON.parse(JSON.stringify(defaultProfileTemplate));
+  }
+
+  let currentProfile = getDefaultProfile();
+  let user = null;
+  const activeSupabase = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+
   /* =====================================================
-     2. HELPER FUNCTIONS & RENDERING
+     2. RENDERING FUNCTIONS
   ====================================================== */
   function starsForRating(rating) {
     let stars = '';
@@ -55,8 +66,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function displayProfile(profile) {
+    if (!profile) return;
+
     const profileIntro = document.getElementById('profileIntro');
     const profileName = document.getElementById('profileName');
+    const profileStudentId = document.getElementById('profileStudentId');
     const profileCourseYear = document.getElementById('profileCourseYear');
     const profileAbout = document.getElementById('profileAbout');
     const profileInterests = document.getElementById('profileInterests');
@@ -71,20 +85,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       profileImg.src = profile.profilePicture;
     }
 
-    if (profileIntro) profileIntro.textContent = profile.intro;
-    if (profileName) profileName.textContent = profile.fullName;
+    if (profileIntro) profileIntro.textContent = profile.intro || '';
+    if (profileName) profileName.textContent = profile.fullName || '';
+    if (profileStudentId) profileStudentId.textContent = profile.studentId || '';
 
     if (profileCourseYear) {
       profileCourseYear.textContent =
-        `${profile.course} · ${profile.yearLevel} · Xavier University — Ateneo de Cagayan`;
+        `${profile.course || ''} · ${profile.yearLevel || ''} · Xavier University — Ateneo de Cagayan`;
     }
 
-    if (profileAbout) profileAbout.textContent = profile.about;
-    if (profileInterests) profileInterests.textContent = profile.interests;
-    if (profileEducation) profileEducation.textContent = profile.education;
-    if (profileGoals) profileGoals.textContent = profile.goals;
+    if (profileAbout) profileAbout.textContent = profile.about || '';
+    if (profileInterests) profileInterests.textContent = profile.interests || '';
+    if (profileEducation) profileEducation.textContent = profile.education || '';
+    if (profileGoals) profileGoals.textContent = profile.goals || '';
 
-    /* SKILLS: Tag List */
+    /* SKILLS: Tag Cloud */
     if (profileSkills) {
       profileSkills.innerHTML = '';
       (profile.skills || []).forEach(skill => {
@@ -95,7 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
 
-    /* SKILLS: Detailed Star List */
+    /* SKILLS: Star List */
     if (profileSkillsList) {
       profileSkillsList.innerHTML = '';
       (profile.skills || []).forEach(skill => {
@@ -115,7 +130,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const stars = document.createElement('span');
         stars.className = 'star-rating';
-        stars.textContent = starsForRating(skill.rating || 3);
+        stars.textContent = starsForRating(typeof skill === 'object' ? (skill.rating || 3) : 3);
 
         body.appendChild(name);
         body.appendChild(stars);
@@ -133,10 +148,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         article.className = 'org';
 
         const h3 = document.createElement('h3');
-        h3.textContent = org.name;
+        h3.textContent = org.name || '';
 
         const p = document.createElement('p');
-        p.textContent = org.description;
+        p.textContent = org.description || '';
 
         article.appendChild(h3);
         article.appendChild(p);
@@ -150,7 +165,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (imgSrc) {
               const img = document.createElement('img');
               img.src = imgSrc;
-              img.alt = `${org.name} photo`;
+              img.alt = `${org.name || 'Organization'} photo`;
               gallery.appendChild(img);
             }
           });
@@ -162,7 +177,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /* =====================================================
-     3. SKILLS EDITOR (STAR PICKER & ADD/REMOVE)
+     3. EDITORS (SKILLS & ORGANIZATIONS)
   ====================================================== */
   const skillsEditor = document.getElementById('skillsEditor');
   const addSkillBtn = document.getElementById('addSkillBtn');
@@ -227,7 +242,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!skillsEditor) return;
     skillsEditor.innerHTML = '';
     (skills || []).forEach(skill => {
-      skillsEditor.appendChild(createSkillRow(skill.name, skill.rating));
+      const skillName = typeof skill === 'string' ? skill : skill.name;
+      const skillRating = typeof skill === 'string' ? 3 : (skill.rating || 3);
+      skillsEditor.appendChild(createSkillRow(skillName, skillRating));
     });
   }
 
@@ -258,9 +275,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     return skills;
   }
 
-  /* =====================================================
-     4. ORGANIZATIONS EDITOR
-  ====================================================== */
   const orgsEditor = document.getElementById('orgsEditor');
   const addOrgBtn = document.getElementById('addOrgBtn');
 
@@ -309,9 +323,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const orgs = [];
 
     rows.forEach(row => {
-      const name = row.querySelector('.org-name-input').value.trim();
-      const description = row.querySelector('.org-desc-input').value.trim();
-      const images = row.querySelector('.org-images-input').value.trim();
+      const nameEl = row.querySelector('.org-name-input');
+      const descEl = row.querySelector('.org-desc-input');
+      const imgEl = row.querySelector('.org-images-input');
+
+      const name = nameEl ? nameEl.value.trim() : '';
+      const description = descEl ? descEl.value.trim() : '';
+      const images = imgEl ? imgEl.value.trim() : '';
 
       if (name !== '') {
         orgs.push({ name, description, images });
@@ -322,7 +340,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /* =====================================================
-     5. FORM DOM ELEMENTS & EDIT TOGGLE LISTENERS
+     4. FORM DOM CONTROLS
   ====================================================== */
   const editProfileBtn = document.getElementById('editProfileBtn');
   const editProfileSection = document.getElementById('editProfileSection');
@@ -330,6 +348,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const cancelEditBtn = document.getElementById('cancelEditBtn');
   const editProfileMessage = document.getElementById('editProfileMessage');
 
+  const editStudentId = document.getElementById('editStudentId');
   const editIntro = document.getElementById('editIntro');
   const editFullName = document.getElementById('editFullName');
   const editCourse = document.getElementById('editCourse');
@@ -339,9 +358,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const editEducation = document.getElementById('editEducation');
   const editGoals = document.getElementById('editGoals');
 
-  let currentProfile = defaultProfile;
-
   function fillEditForm(profile) {
+    if (editStudentId) editStudentId.value = profile.studentId || '';
     if (editIntro) editIntro.value = profile.intro || '';
     if (editFullName) editFullName.value = profile.fullName || '';
     if (editCourse) editCourse.value = profile.course || '';
@@ -374,117 +392,146 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /* =====================================================
-     6. AUTH & DATABASE DATA FETCHING
+     5. INITIAL DATA LOAD (LOCAL FIRST + SUPABASE)
   ====================================================== */
-  let user = null;
-
-  try {
-    const sessionResponse = await supabase.auth.getUser();
-    user = sessionResponse.data?.user;
-  } catch (err) {
-    console.warn('Supabase auth not initialized or offline. Using default profile mode.');
+  function loadLocalCache() {
+    const cached = localStorage.getItem(STORAGE_KEY);
+    if (cached) {
+      try {
+        return { ...getDefaultProfile(), ...JSON.parse(cached) };
+      } catch (e) {
+        console.warn('Cache parse error');
+      }
+    }
+    return getDefaultProfile();
   }
 
-  if (user) {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .maybeSingle();
+  currentProfile = loadLocalCache();
+  displayProfile(currentProfile);
 
-    if (!error && data) {
-      currentProfile = {
-        fullName: data.full_name || defaultProfile.fullName,
-        course: data.course || defaultProfile.course,
-        yearLevel: data.year_level || defaultProfile.yearLevel,
-        intro: data.intro || defaultProfile.intro,
-        about: data.about || defaultProfile.about,
-        interests: data.interests || defaultProfile.interests,
-        education: data.education || defaultProfile.education,
-        goals: data.goals || defaultProfile.goals,
-        skills: Array.isArray(data.skills) && data.skills.length > 0 ? data.skills : defaultProfile.skills,
-        orgs: Array.isArray(data.orgs) && data.orgs.length > 0 ? data.orgs : defaultProfile.orgs,
-        profilePicture: data.profile_picture || null
-      };
+  async function loadDatabaseProfile() {
+    if (!activeSupabase) return;
+
+    try {
+      const { data: sessionData } = await activeSupabase.auth.getSession();
+      user = sessionData?.session?.user || null;
+
+      if (!user) {
+        const userResp = await activeSupabase.auth.getUser();
+        user = userResp.data?.user || null;
+      }
+
+      if (user && user.id) {
+        const { data: dbData, error } = await activeSupabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (!error && dbData) {
+          currentProfile = {
+            studentId: dbData.student_id || currentProfile.studentId,
+            fullName: dbData.full_name || currentProfile.fullName,
+            course: dbData.course || currentProfile.course,
+            yearLevel: dbData.year_level || currentProfile.yearLevel,
+            about: dbData.about || currentProfile.about,
+            intro: dbData.intro || currentProfile.intro,
+            interests: dbData.interests || currentProfile.interests,
+            education: dbData.education || currentProfile.education,
+            goals: dbData.goals || currentProfile.goals,
+            skills: (Array.isArray(dbData.skills) && dbData.skills.length > 0) ? dbData.skills : currentProfile.skills,
+            orgs: (Array.isArray(dbData.orgs) && dbData.orgs.length > 0) ? dbData.orgs : currentProfile.orgs,
+            profilePicture: dbData.profile_picture || currentProfile.profilePicture
+          };
+
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(currentProfile));
+          displayProfile(currentProfile);
+        }
+      }
+    } catch (err) {
+      console.warn('Background db fetch notice:', err);
     }
   }
 
-  displayProfile(currentProfile);
+  loadDatabaseProfile();
+
 
   /* =====================================================
-     7. SAVE FORM SUBMISSION & VALIDATION
+     6. INSTANT & OPTIMIZED SAVE (NON-BLOCKING)
   ====================================================== */
   if (editProfileForm) {
     editProfileForm.addEventListener('submit', async event => {
       event.preventDefault();
 
-      const intro = editIntro ? editIntro.value.trim() : '';
-      const fullName = editFullName ? editFullName.value.trim() : '';
-      const course = editCourse ? editCourse.value.trim() : '';
-      const yearLevel = editYearLevel ? editYearLevel.value.trim() : '';
-      const about = editAbout ? editAbout.value.trim() : '';
-      const interests = editInterests ? editInterests.value.trim() : '';
-      const education = editEducation ? editEducation.value.trim() : '';
-      const goals = editGoals ? editGoals.value.trim() : '';
+      // Extract form values instantly
+      const studentId = editStudentId ? editStudentId.value.trim() : (currentProfile.studentId || '');
+      const intro = editIntro ? editIntro.value.trim() : (currentProfile.intro || '');
+      const fullName = editFullName ? editFullName.value.trim() : (currentProfile.fullName || '');
+      const course = editCourse ? editCourse.value.trim() : (currentProfile.course || '');
+      const yearLevel = editYearLevel ? editYearLevel.value.trim() : (currentProfile.yearLevel || '');
+      const about = editAbout ? editAbout.value.trim() : (currentProfile.about || '');
+      const interests = editInterests ? editInterests.value.trim() : (currentProfile.interests || '');
+      const education = editEducation ? editEducation.value.trim() : (currentProfile.education || '');
+      const goals = editGoals ? editGoals.value.trim() : (currentProfile.goals || '');
 
       const skills = collectSkillsFromEditor();
       const orgs = collectOrgsFromEditor();
 
-      if (!intro) { showMessage('Please enter your Introduction.', 'error'); return; }
-      if (!fullName) { showMessage('Please enter your Full Name.', 'error'); return; }
-      if (!course) { showMessage('Please enter your Course.', 'error'); return; }
-      if (!yearLevel) { showMessage('Please enter your Year Level.', 'error'); return; }
-      if (!about) { showMessage('Please enter your About Me information.', 'error'); return; }
-      if (!interests) { showMessage('Please enter your Interests.', 'error'); return; }
-      if (!education) { showMessage('Please enter your Educational Background.', 'error'); return; }
-      if (!goals) { showMessage('Please enter your Goals & Aspirations.', 'error'); return; }
-      if (skills.length === 0) { showMessage('Please add at least one skill.', 'error'); return; }
-
       const updatedProfile = {
-        intro, fullName, course, yearLevel, about, interests, education, goals, skills, orgs,
+        studentId, intro, fullName, course, yearLevel, about, interests, education, goals, skills, orgs,
         profilePicture: currentProfile.profilePicture
       };
 
-      if (user) {
-        showMessage('Saving changes to Supabase database...', 'info');
-        const { error } = await supabase.from('profiles').upsert({
-          id: user.id,
-          full_name: fullName,
-          course: course,
-          year_level: yearLevel,
-          intro: intro,
-          about: about,
-          interests: interests,
-          education: education,
-          goals: goals,
-          skills: skills,
-          orgs: orgs
-        });
-
-        if (error) {
-          showMessage('Database Error: ' + error.message, 'error');
-          return;
-        }
-      }
-
+      // 1. INSTANT UI & CACHE UPDATE (Zero Delay)
       currentProfile = updatedProfile;
       displayProfile(currentProfile);
-      showMessage('Profile updated successfully!', 'success');
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProfile));
 
-      setTimeout(() => {
-        if (editProfileSection) editProfileSection.setAttribute('hidden', 'true');
-      }, 700);
+      // 2. IMMEDIATE FEEDBACK & CLOSE MODAL RIGHT AWAY
+      showMessage('Saved!', 'success');
+      if (editProfileSection) {
+        setTimeout(() => editProfileSection.setAttribute('hidden', 'true'), 300);
+      }
+
+      // 3. BACKGROUND DATABASE SYNC (Runs in background without making user wait)
+      if (activeSupabase) {
+        (async () => {
+          try {
+            // Use existing user object or fetch once if null
+            const activeUser = user || (await activeSupabase.auth.getUser()).data?.user;
+            if (!activeUser || !activeUser.id) return;
+
+            const dbPayload = {
+              id: activeUser.id,
+              student_id: studentId,
+              full_name: fullName,
+              course: course,
+              year_level: yearLevel,
+              about: about,
+              intro: intro,
+              interests: interests,
+              education: education,
+              goals: goals,
+              skills: skills,
+              orgs: orgs,
+              updated_at: new Date().toISOString()
+            };
+
+            // Send payload silently
+            const { error } = await activeSupabase
+              .from('profiles')
+              .upsert(dbPayload, { onConflict: 'id' });
+
+            if (error) console.error('Background sync database error:', error.message);
+          } catch (err) {
+            console.warn('Background sync failed (saved locally):', err);
+          }
+        })();
+      }
     });
   }
-
-  function showMessage(message, type) {
-    if (!editProfileMessage) return;
-    editProfileMessage.textContent = message;
-    editProfileMessage.className = `form-message ${type}`;
-  }
-
   /* =====================================================
-     8. CORDOVA CAMERA & DATABASE PICTURE SAVE
+     7. CORDOVA CAMERA & PHOTO SAVE
   ====================================================== */
   const changeProfilePicture = document.getElementById('changeProfilePicture');
   const avatarWrap = document.getElementById('avatarWrap');
@@ -503,15 +550,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         profileImg.src = imageSource;
         currentProfile.profilePicture = imageSource;
 
-        if (user) {
-          const { error } = await supabase
-            .from('profiles')
-            .upsert({ id: user.id, profile_picture: imageSource });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(currentProfile));
 
-          if (error) {
-            alert('Failed to save profile picture to database: ' + error.message);
-          } else {
-            alert('Profile picture saved!');
+        if (user && user.id && activeSupabase) {
+          try {
+            await activeSupabase
+              .from('profiles')
+              .upsert({ id: user.id, profile_picture: imageSource, updated_at: new Date().toISOString() }, { onConflict: 'id' });
+          } catch (e) {
+            console.warn('Photo database push error:', e);
           }
         }
       },
@@ -541,20 +588,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /* =====================================================
-     9. DELETE RECORD & LOGOUT LISTENERS
+     8. LOGOUT & DELETE RECORD
   ====================================================== */
   const deleteProfileBtn = document.getElementById('deleteProfileBtn');
   if (deleteProfileBtn) {
     deleteProfileBtn.addEventListener('click', async (e) => {
-      e.preventDefault(); // Prevent default link/button action
+      e.preventDefault();
       
       if (confirm('Are you sure you want to delete your profile record?')) {
         try {
-          if (user) {
-            const { error } = await supabase.from('profiles').delete().eq('id', user.id);
-            if (error) throw error;
-            await supabase.auth.signOut();
+          if (user && user.id && activeSupabase) {
+            await activeSupabase.from('profiles').delete().eq('id', user.id);
           }
+          localStorage.removeItem(STORAGE_KEY);
+          if (activeSupabase) await activeSupabase.auth.signOut();
           alert('Profile deleted.');
           window.location.href = '../Auth/Login.html';
         } catch (err) {
@@ -567,26 +614,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async (e) => {
-      e.preventDefault(); // <-- Prevents page from jumping before sign-out completes
+      e.preventDefault();
       
       try {
-        await supabase.auth.signOut();
-        // Clear local session storage if any exists
-        localStorage.clear();
+        if (activeSupabase) {
+          await activeSupabase.auth.signOut();
+        }
         sessionStorage.clear();
-        
-        // Redirect to Login page
         window.location.href = '../Auth/Login.html';
       } catch (err) {
         console.error('Logout error:', err);
-        // Force redirect even if signout call throws a network error
         window.location.href = '../Auth/Login.html';
       }
     });
   }
-  }); // <-- Closes DOMContentLoaded listener
-
-// Cordova ready logging
-document.addEventListener('deviceready', () => {
-  console.log('Cordova device ready. Camera available.');
-}, false);
+});

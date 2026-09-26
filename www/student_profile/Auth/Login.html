@@ -61,13 +61,19 @@
   </div>
 </div>
 
-<!-- 1. Supabase SDK CDN -->
+<!-- 1. Load Supabase CDN Library -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- 2. Supabase Initialization Config -->
-<script src="../../js/supabase-config.js"></script>
+<!-- 2. Initialize Supabase Client -->
+<script>
+  // ⚠️ Ensure SUPABASE_URL has NO trailing slashes or subpaths (e.g. 'https://xyz.supabase.co')
+  const SUPABASE_URL = 'https://jlttlcgbgmueljlrgixu.supabase.co/';
+  const SUPABASE_ANON_KEY = 'sb_publishable_iHeCYxtjWuRjzqM41be9mA_iz89ZrGy';
 
-<!-- 3. Form Authentication Script -->
+  window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
+
+<!-- 3. Form Authentication Logic -->
 <script>
   let isRegisterMode = false;
   const authForm = document.getElementById('authForm');
@@ -87,6 +93,13 @@
     e.preventDefault();
     errorMsg.style.display = 'none';
 
+    const client = window.supabaseClient;
+
+    if (!client || !client.auth) {
+      showError('Supabase client failed to initialize. Check your URL and Key.');
+      return;
+    }
+
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
 
@@ -97,7 +110,6 @@
 
     try {
       if (isRegisterMode) {
-        // CRUD: CREATE (Register User + Insert Profile Row)
         const studentId = document.getElementById('studentId').value.trim();
         const fullName = document.getElementById('fullName').value.trim();
 
@@ -106,26 +118,33 @@
           return;
         }
 
-        const { data: authData, error: signUpError } = await supabase.auth.signUp({ email, password });
+        // 1. Sign up user in Auth
+        const { data: authData, error: signUpError } = await client.auth.signUp({ email, password });
         if (signUpError) throw signUpError;
 
+        // 2. Insert into public.profiles using EXACT table columns
         if (authData.user) {
-          const { error: profileError } = await supabase.from('profiles').insert([{
+          const { error: profileError } = await client.from('profiles').insert([{
             id: authData.user.id,
             student_id: studentId,
             full_name: fullName,
             course: 'BS Information Technology',
             year_level: '3rd Year',
             about: 'Welcome to my student profile!',
-            skills: ['Web Development', 'SQL', 'Data Analysis']
+            skills: [
+              { name: 'Database Management', rating: 4 },
+              { name: 'Web Development', rating: 4 }
+            ]
           }]);
+
           if (profileError) throw profileError;
+
           alert('Registration successful! Logging you in...');
           window.location.href = '../Homepage/Index.html';
         }
       } else {
-        // AUTHENTICATION: LOGIN
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        // Sign in existing user
+        const { data, error } = await client.auth.signInWithPassword({ email, password });
         if (error) throw error;
 
         window.location.href = '../Homepage/Index.html';
