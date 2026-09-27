@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+
   const defaultProfile = {
     intro: 'Welcome to my little corner of the internet.',
     fullName: 'Student',
@@ -223,89 +224,6 @@ document.addEventListener('DOMContentLoaded', () => {
         profileOrgsList.appendChild(article);
       });
     }
-  }
-
-  /* =====================================================
-     CAMERA / PROFILE PICTURE
-  ====================================================== */
-  const changeProfilePicture = document.getElementById('changeProfilePicture');
-  const avatarWrap = document.getElementById('avatarWrap');
-  const profileImg = document.getElementById('profileImg');
-  const defaultPhotoSrc = profileImg ? profileImg.getAttribute('src') : '';
-  let usingCustomPhoto = false;
-
-  if (profileImg) {
-    profileImg.addEventListener('load', () => {
-      if (avatarWrap) avatarWrap.classList.remove('no-photo');
-    });
-
-    profileImg.addEventListener('error', () => {
-      if (usingCustomPhoto) {
-        usingCustomPhoto = false;
-        profileImg.src = defaultPhotoSrc;
-      } else if (avatarWrap) {
-        avatarWrap.classList.add('no-photo');
-      }
-    });
-  }
-
-  function applySavedPhoto(avatarData) {
-    if (avatarData && profileImg) {
-      usingCustomPhoto = true;
-      profileImg.src = avatarData;
-    }
-  }
-
-  function takeProfilePicture() {
-    if (!navigator.camera || !window.Camera) {
-      alert('Camera plugin not detected. Please run the app on a Cordova device or emulator with cordova-plugin-camera installed.');
-      return;
-    }
-
-    navigator.camera.getPicture(
-      async function onPhotoSuccess(imageData) {
-        if (!profileImg) return;
-        const imageSource = 'data:image/jpeg;base64,' + imageData;
-        usingCustomPhoto = true;
-        profileImg.src = imageSource;
-
-        if (!currentUserId) return;
-
-        const error = await savePhotoToDb(currentUserId, imageSource);
-        if (error) {
-          console.error('Unable to save the profile picture:', error);
-          alert('The photo was captured, but it could not be saved. Please try again.');
-        }
-      },
-      function onPhotoError(error) {
-        const message = String(error || '').toLowerCase();
-        if (message.includes('cancel') || message === 'no image selected') {
-          return;
-        }
-        console.error('Camera error:', error);
-        alert('Unable to access the camera. Please try again.');
-      },
-      {
-        quality: 70,
-        targetWidth: 600,
-        targetHeight: 600,
-        destinationType: window.Camera.DestinationType.DATA_URL,
-        sourceType: window.Camera.PictureSourceType.CAMERA,
-        encodingType: window.Camera.EncodingType.JPEG,
-        mediaType: window.Camera.MediaType.PICTURE,
-        correctOrientation: true,
-        saveToPhotoAlbum: false
-      }
-    );
-  }
-
-  if (changeProfilePicture) {
-    changeProfilePicture.addEventListener('click', takeProfilePicture);
-  }
-
-  if (avatarWrap) {
-    avatarWrap.addEventListener('click', takeProfilePicture);
-    avatarWrap.style.cursor = 'pointer';
   }
 
   /* =====================================================
@@ -616,9 +534,60 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!session) return; // already redirected to Login
 
     currentUserId = session.user.id;
+    window.currentUserId = currentUserId;
     currentProfile = await loadProfileFromDb(currentUserId);
 
     displayProfile(currentProfile);
     applySavedPhoto(currentProfile.avatarData);
   })();
 });
+
+/* =====================================================
+   CAMERA / PROFILE PICTURE
+   Kept outside the main profile/Supabase code
+====================================================== */
+
+document.addEventListener('deviceready', function () {
+  const avatarWrap = document.getElementById('avatarWrap');
+  const profileImg = document.getElementById('profileImg');
+
+  if (!avatarWrap) {
+    console.error('avatarWrap was not found.');
+    return;
+  }
+  console.log('Camera section is ready.');
+  avatarWrap.addEventListener('click', function () {
+
+    console.log('Profile photo clicked.');
+
+    if (!navigator.camera) {
+      alert('Camera plugin is not available.');
+      console.error('navigator.camera is missing.');
+      return;
+    }
+    navigator.camera.getPicture(
+      function (imageData) {
+        console.log('Photo captured.');
+        if (profileImg) {
+          profileImg.src = 'data:image/jpeg;base64,' + imageData;
+        }
+      },
+
+      function (error) {
+        console.error('Camera error:', error);
+      },
+      {
+        quality: 70,
+        targetWidth: 600,
+        targetHeight: 600,
+        destinationType: Camera.DestinationType.DATA_URL,
+        sourceType: Camera.PictureSourceType.CAMERA,
+        encodingType: Camera.EncodingType.JPEG,
+        mediaType: Camera.MediaType.PICTURE,
+        correctOrientation: true,
+        saveToPhotoAlbum: false
+      }
+    );
+  });
+  avatarWrap.style.cursor = 'pointer';
+}, false);
