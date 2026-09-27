@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+
   const defaultProfile = {
     intro: 'Welcome to my little corner of the internet.',
     fullName: 'Student',
@@ -97,19 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* =====================================================
-     SAVE JUST THE PHOTO TO THE DATABASE
-  ====================================================== */
-  async function savePhotoToDb(userId, imageSource) {
-    const { error } = await client.from('profiles').upsert({
-      id: userId,
-      avatar_data: imageSource,
-      updated_at: new Date().toISOString()
-    });
-
-    return error;
-  }
-
-  /* =====================================================
      STAR RENDERING HELPER
   ====================================================== */
   function starsForRating(rating) {
@@ -118,6 +106,16 @@ document.addEventListener('DOMContentLoaded', () => {
       stars += i <= rating ? '★' : '☆';
     }
     return stars;
+  }
+
+  /* =====================================================
+     APPLY THE SAVED PHOTO ON LOAD
+  ====================================================== */
+  function applySavedPhoto(avatarData) {
+    const profileImg = document.getElementById('profileImg');
+    if (avatarData && profileImg) {
+      profileImg.src = avatarData;
+    }
   }
 
   /* =====================================================
@@ -227,85 +225,79 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* =====================================================
      CAMERA / PROFILE PICTURE
+     Attached here, inside DOMContentLoaded, instead of inside a
+     'deviceready' listener. 'deviceready' fires once, early, and
+     can fire before this script finishes loading (since it loads
+     after the Supabase scripts), which meant the listener below
+     was sometimes never attached at all. Checking for the camera
+     plugin at the moment of the click avoids that race entirely.
   ====================================================== */
-  const changeProfilePicture = document.getElementById('changeProfilePicture');
   const avatarWrap = document.getElementById('avatarWrap');
   const profileImg = document.getElementById('profileImg');
-  const defaultPhotoSrc = profileImg ? profileImg.getAttribute('src') : '';
-  let usingCustomPhoto = false;
+  const changeProfilePicture = document.getElementById('changeProfilePicture');
 
-  if (profileImg) {
-    profileImg.addEventListener('load', () => {
-      if (avatarWrap) avatarWrap.classList.remove('no-photo');
+  async function savePhotoToDb(userId, imageSource) {
+    const { error } = await client.from('profiles').upsert({
+      id: userId,
+      avatar_data: imageSource,
+      updated_at: new Date().toISOString()
     });
-
-    profileImg.addEventListener('error', () => {
-      if (usingCustomPhoto) {
-        usingCustomPhoto = false;
-        profileImg.src = defaultPhotoSrc;
-      } else if (avatarWrap) {
-        avatarWrap.classList.add('no-photo');
-      }
-    });
+    return error;
   }
 
-  function applySavedPhoto(avatarData) {
-    if (avatarData && profileImg) {
-      usingCustomPhoto = true;
-      profileImg.src = avatarData;
+  async function handlePhotoCaptured(imageData) {
+    const imageSource = 'data:image/jpeg;base64,' + imageData;
+
+    if (profileImg) {
+      profileImg.src = imageSource;
+    }
+
+    if (!currentUserId) {
+      alert('The photo was captured, but your account is still loading. Please try again in a moment.');
+      return;
+    }
+
+    const error = await savePhotoToDb(currentUserId, imageSource);
+    if (error) {
+      console.error('Unable to save the profile picture:', error);
+      alert('The photo was captured, but it could not be saved. Please try again.');
     }
   }
 
-  function takeProfilePicture() {
-    if (!navigator.camera || !window.Camera) {
-      alert('Camera plugin not detected. Please run the app on a Cordova device or emulator with cordova-plugin-camera installed.');
+  function takePicture() {
+    if (!navigator.camera) {
+      alert('Camera plugin is not available.');
+      console.error('navigator.camera is missing.');
       return;
     }
 
     navigator.camera.getPicture(
-      async function onPhotoSuccess(imageData) {
-        if (!profileImg) return;
-        const imageSource = 'data:image/jpeg;base64,' + imageData;
-        usingCustomPhoto = true;
-        profileImg.src = imageSource;
-
-        if (!currentUserId) return;
-
-        const error = await savePhotoToDb(currentUserId, imageSource);
-        if (error) {
-          console.error('Unable to save the profile picture:', error);
-          alert('The photo was captured, but it could not be saved. Please try again.');
-        }
+      function (imageData) {
+        handlePhotoCaptured(imageData);
       },
-      function onPhotoError(error) {
-        const message = String(error || '').toLowerCase();
-        if (message.includes('cancel') || message === 'no image selected') {
-          return;
-        }
+      function (error) {
         console.error('Camera error:', error);
-        alert('Unable to access the camera. Please try again.');
       },
       {
         quality: 70,
         targetWidth: 600,
         targetHeight: 600,
-        destinationType: window.Camera.DestinationType.DATA_URL,
-        sourceType: window.Camera.PictureSourceType.CAMERA,
-        encodingType: window.Camera.EncodingType.JPEG,
-        mediaType: window.Camera.MediaType.PICTURE,
+        destinationType: Camera.DestinationType.DATA_URL,
+        sourceType: Camera.PictureSourceType.CAMERA,
+        encodingType: Camera.EncodingType.JPEG,
+        mediaType: Camera.MediaType.PICTURE,
         correctOrientation: true,
         saveToPhotoAlbum: false
       }
     );
   }
 
-  if (changeProfilePicture) {
-    changeProfilePicture.addEventListener('click', takeProfilePicture);
-  }
-
   if (avatarWrap) {
-    avatarWrap.addEventListener('click', takeProfilePicture);
+    avatarWrap.addEventListener('click', takePicture);
     avatarWrap.style.cursor = 'pointer';
+  }
+  if (changeProfilePicture) {
+    changeProfilePicture.addEventListener('click', takePicture);
   }
 
   /* =====================================================
@@ -609,6 +601,89 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* =====================================================
+     DELETE DEMO (CRUD requirement)
+     Separate table, separate from the real profile, so this
+     never touches actual student data.
+  ====================================================== */
+  const deleteDemoStatus = document.getElementById('deleteDemoStatus');
+  const createTestRecordBtn = document.getElementById('createTestRecordBtn');
+  const deleteTestRecordBtn = document.getElementById('deleteTestRecordBtn');
+
+  async function refreshDeleteDemoStatus() {
+    if (!deleteDemoStatus || !client) return;
+
+    const { data, error } = await client
+      .from('delete_demo')
+      .select('id, label, created_at')
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (error) {
+      deleteDemoStatus.textContent = 'Unable to check the test record.';
+      console.error('Delete demo status error:', error);
+      return;
+    }
+
+    if (data && data.length > 0) {
+      deleteDemoStatus.textContent = `Current test record: "${data[0].label}"`;
+    } else {
+      deleteDemoStatus.textContent = 'No test record yet.';
+    }
+  }
+
+  if (createTestRecordBtn) {
+    createTestRecordBtn.addEventListener('click', async () => {
+      if (!client) return;
+      const { error } = await client
+        .from('delete_demo')
+        .insert([{ label: 'Sample test record created ' + new Date().toLocaleTimeString() }]);
+
+      if (error) {
+        console.error('Unable to create test record:', error);
+        alert('Could not create the test record.');
+        return;
+      }
+      refreshDeleteDemoStatus();
+    });
+  }
+
+  if (deleteTestRecordBtn) {
+    deleteTestRecordBtn.addEventListener('click', async () => {
+      if (!client) return;
+
+      const { data, error: fetchError } = await client
+        .from('delete_demo')
+        .select('id')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (fetchError) {
+        console.error('Unable to find a test record to delete:', fetchError);
+        alert('Could not find a test record to delete.');
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        alert('There is no test record to delete. Create one first.');
+        return;
+      }
+
+      const { error: deleteError } = await client
+        .from('delete_demo')
+        .delete()
+        .eq('id', data[0].id);
+
+      if (deleteError) {
+        console.error('Unable to delete test record:', deleteError);
+        alert('Could not delete the test record.');
+        return;
+      }
+
+      refreshDeleteDemoStatus();
+    });
+  }
+
+  /* =====================================================
      STARTUP
   ====================================================== */
   (async function init() {
@@ -616,9 +691,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!session) return; // already redirected to Login
 
     currentUserId = session.user.id;
+    window.currentUserId = currentUserId;
     currentProfile = await loadProfileFromDb(currentUserId);
 
     displayProfile(currentProfile);
     applySavedPhoto(currentProfile.avatarData);
+    refreshDeleteDemoStatus();
   })();
 });
