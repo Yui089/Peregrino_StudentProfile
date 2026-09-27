@@ -1,191 +1,150 @@
-# Peregrino — Student Profile
+# Peregrino_StudentProfile
 
 ## 1. Project Description
 
-Yana — Student Profile is a Cordova based mobile application that presents a student's personal information, skills, projects, and contact details in an organized and responsive interface.
-
-The application also allows the student to edit profile information and change the profile picture using the device camera.
+This is my Student Profile application for BSIT. It started in earlier activities as a static, then a localStorage driven, multi page site (Profile, About, Skills, Projects, Contact). In Activity 7 I turned it into a database driven application. Instead of information living only on one device, it now lives in a Supabase (PostgreSQL) database, tied to a login account, so my profile follows me across devices and stays there after I log out and back in.
 
 ## 2. Application Pages
 
-### Profile
+- **Profile (Homepage)** — my main landing page after login. Shows my photo, name, course, year level, a short introduction, and lets me open the Edit Profile form.
+- **About** — my About Me text, interests, educational background, and goals, pulled from the database.
+- **Skills** — my technical skills with star ratings, pulled from the database.
+- **Projects** — a showcase of school projects I have built.
+- **Contact** — my contact details.
+- **Login** — the entry point of the app. This is where I sign in with an existing account, or register a new one. No profile page can be viewed without going through this page first.
 
-The Profile page serves as the main page of the application. It displays the student's profile picture, name, introduction, and basic information. It also provides access to the Edit Profile and Change Profile Picture features.
+## 3. Authentication
 
-### About
+Login flow:
 
-The About page provides additional information about the student, including their background, interests, and goals.
+Login → Authentication → Valid credentials? → No: show error message → Yes: Student Profile
 
-### Skills
+I use Supabase Auth for authentication (email and password). On the Login page:
 
-The Skills page presents the student's technical and other relevant skills. It shows the areas that the student is currently learning and developing.
+- Signing in calls Supabase's `signInWithPassword`, which checks the email and password against the database and returns a session if they match.
+- Registering calls `signUp`, which creates the account, then a database trigger automatically creates a matching profile row for that account.
+- If credentials are wrong, or a required field is empty, an error message is shown on the Login page and access is denied.
+- Every other page (Profile, About, Skills, Projects, Contact) checks for a valid session as soon as it loads. If there is no session, the page redirects back to Login before showing any profile data or letting me use Edit Profile.
 
-### Projects
+## 4. Student Profile Management
 
-The Projects page displays the student's completed and ongoing projects. Each project provides information about the project and the technologies or concepts used.
+Once logged in, I can:
 
-### Contact
+- **View my profile** — the app loads my row from the database and fills in my name, course, year level, about me, interests, education, goals, skills, and photo.
+- **Edit my information** — the Edit Profile form lets me change my introduction, name, course, year level, about me, interests, education, goals, and skills (with star ratings).
+- **Save changes** — pressing Save Changes validates the form, then updates my row in the database. A success message appears, and the page updates immediately to show the new information.
+- **Update my profile picture** — tapping my photo or the Change Profile Picture button opens the device camera through Cordova, and the captured photo is saved to my database row.
+- **Log out** — the Log Out button ends my Supabase session and returns me to the Login page. From that point, my profile can only be viewed again by logging in.
 
-The Contact page provides the student's contact information and ways to get in touch.
+## 5. Database Integration
 
-## 3. Profile Editing
+**Database technology:** Supabase, which is PostgreSQL with a built in authentication system and auto generated API.
 
-The application includes an **Edit Profile** feature that allows the student to update information displayed on the Profile page.
+**profiles table**, one row per account, storing:
 
-The edited information is stored using the browser's **localStorage**. This allows the updated profile information to remain available when the application is reopened on the same device.
+- Student ID
+- Full name
+- Course
+- Year level
+- Introduction
+- About Me
+- Interests
+- Educational background
+- Goals and aspirations
+- Skills (stored as a list of skill name and star rating pairs)
+- Organizations (stored as a list of organization name, description, and image paths)
+- Profile picture (stored as the captured photo)
+- Last updated timestamp
 
-The Edit Profile feature provides **Save** and **Cancel** options. Save applies the changes, while Cancel returns to the previous information without saving the edits.
+Each row's id matches the id of the account that owns it, which is how the app knows which profile belongs to which login.
 
-## 4. Camera Integration
+## 6. API/Backend
 
-The application uses the **Cordova Camera Plugin** to allow the student to change their profile picture using the device camera.
+Cordova Application → Supabase client library → Supabase API → PostgreSQL Database
 
-The process is:
+I did not write a custom backend server. Supabase provides a hosted API in front of the database. The Cordova app talks to that API directly through the `supabase-js` library, using a public anon key. What each account is allowed to read or write is enforced on the database side by row level security policies, not by a server I run myself.
 
-**Change Profile Picture → Open Camera → Capture Image → Update Profile Picture**
+## 7. CRUD Operations
 
-When the user selects **Change Profile Picture**, the application opens the device camera through the Cordova Camera Plugin. After taking a picture and confirming it, the captured image is displayed as the new profile picture.
+- **Create** — when a new account registers on the Login page, a database trigger creates the matching profile row automatically, seeded with starter values.
+- **Read** — every page (Profile, About, Skills) reads the signed in account's row from the profiles table and displays it.
+- **Update** — the Edit Profile form and the camera feature both update the signed in account's row: form fields through one update, and the photo through a separate update so editing text never overwrites the photo.
+- **Delete** — the delete profile that deletes the entire account.
 
-## 5. Device Feature Integration
+## 8. Camera Integration
 
-Cordova is used because it allows a web based application using HTML, CSS, and JavaScript to access native device features.
+The camera feature from Activity 6 is unchanged in how it is triggered (tapping the photo or the Change Profile Picture button opens the device camera through `cordova-plugin-camera`). What changed is where the photo goes afterward: instead of saving it to localStorage, the captured photo is now saved to the signed in account's row in the database, so it is available on any device that account logs in from.
 
-For this project, Cordova provides access to the device camera through the `cordova-plugin-camera` plugin. This allows the application to interact with the camera while keeping the main application interface built with web technologies.
+## 9. Data Persistence
 
-## 6. Image Handling
+Update Profile → Save to Database → Logout → Login Again → Retrieve Updated Profile
 
-After an image is captured, the camera plugin returns the image data to the application.
+Because profile data lives in Supabase rather than the browser's localStorage, it survives:
 
-The captured image is assigned to the profile image element so that it immediately replaces the previous profile picture.
+- Closing the app
+- Restarting the app
+- Logging out and logging back in, on the same or a different device
 
-The image data is also stored in `localStorage` as the profile picture data. When the Profile page is loaded again, the saved image data is retrieved and displayed, allowing the updated profile picture to persist between application sessions.
+localStorage was used in earlier activities and only persisted on one browser or one device. The database now is the source of truth, so my information reliably comes back exactly as I left it.
 
-## 7. Error Handling
+## 10. Responsive Design
 
-The application includes basic error handling for different camera situations.
+The layout uses a fluid grid with breakpoints for mobile, tablet (640px and up), and laptop (1024px and up) screens, so spacing, font sizes, and the profile photo frame all scale appropriately. On small screens, the profile header stacks the photo above the name and keeps the Edit Profile and Log Out buttons side by side rather than letting them wrap awkwardly.
 
-### Camera Permission Denial
+## 11. Security
 
-If the application cannot access the camera because permission was denied, an error message is displayed to inform the user that the camera could not be accessed.
+- Passwords are never stored as plain text. Supabase Auth hashes and manages passwords; my code never sees or stores a raw password.
+- The key embedded in `supabase-client.js` is a public anon key, meant to be exposed in client code. It cannot bypass the database's row level security policies, so it does not grant access beyond what those policies allow.
+- No database password, service role key, or other private credential is included in this repository.
+- Row level security policies on the profiles table restrict every account to reading and writing only its own row, so one student's data cannot be read or changed by another student's session.
 
-### Camera Cancellation
+## 12. How to Run
 
-If the user opens the camera but cancels without capturing an image, the application does not replace the existing profile picture.
+1. Create a free Supabase project.
+2. Open the SQL editor in Supabase and run `schema.sql` from this repository. This creates the profiles table, its policies, and the trigger that creates a profile row on registration.
+3. In `js/supabase-client.js`, set `SUPABASE_URL` and `SUPABASE_ANON_KEY` to your own project's values.
+4. Install project dependencies and Cordova platforms as needed (`cordova platform add android` or `cordova platform add ios`).
+5. Run `cordova prepare` to sync the web files into the native project.
+6. Build and run with `cordova run android` (or `ios`), or open the built project in Android Studio/Xcode and run it from there.
+7. The app opens on the Login page. Register a new account or use a test account (see below).
 
-### Camera Errors
+## 13. Test Accounts
 
-If another camera error occurs, the application displays a message informing the user that the camera could not be accessed and that they can try again.
+[Add a test account created specifically for grading, for example:]
 
-## 8. Responsive Design
+- Email: `haiana@gmail.com`
+- Password: `123456`
 
-The application uses responsive design techniques so that its interface can adjust to different screen sizes.
+## 14. Application Screenshots
 
-The application is designed to remain usable across:
+[Add screenshots here for:]
 
-- **Desktop** — Provides a wider layout for larger screens.
+- Login page
+  
+  <img width="250" height="555" alt="f509e2b1-beda-416b-bcfc-1282d6cac5a7" src="https://github.com/user-attachments/assets/48044251-b59f-4b2f-b8e6-0c49122a4f57" />
 
-  <img width="559" height="317" alt="Screenshot 2026-09-25 021058" src="https://github.com/user-attachments/assets/1d3ad974-5d62-4a5a-8e01-403130027b48" />
+- Student Profile
+  
+  <img width="250" height="555" alt="60359fcf-5144-4570-8786-9f04a3a633bd" src="https://github.com/user-attachments/assets/f1300719-410b-4c63-91af-8e9943c0bf07" />
 
-- **Tablet** — Adjusts the layout and spacing for medium sized screens.
+- Edit Profile
+  
+  <img width="250" height="555" alt="0ad3d1b2-82ed-4828-88a1-d32411143bf8" src="https://github.com/user-attachments/assets/4d551f79-30aa-42d2-8dbf-295831959464" />
 
-  <img width="559" height="317" alt="ef98031e-3a54-4559-a447-78f7dc9ae8f8" src="https://github.com/user-attachments/assets/c4db2841-94fc-4303-9ab8-1575abf41c79" />
+- Updated Profile
+  
+  <img width="250" height="555" alt="7f760db0-0c60-4387-80c8-709198f45d20" src="https://github.com/user-attachments/assets/c043a402-9336-4c7c-a87f-2c024a75034a" />
 
-- **Mobile** — Uses a compact layout suitable for smaller device screens.
+- Profile Picture/Camera
 
-  <img width="222" height="548" alt="f66771cd-68fd-4c95-ba77-7e466acb22b8" src="https://github.com/user-attachments/assets/93d4f0ad-40d0-4101-81ac-a1f4b4905e4f" />
+  <img width="250" height="555" alt="d6aa3c8d-b3d5-4dd2-bd00-a3ea6301ba39" src="https://github.com/user-attachments/assets/6ccd7ef0-f525-4131-af3c-6f236babc3fb" />
 
-This allows the pages and profile features to remain accessible regardless of the device being used.
+- Logout
+  
+ <img width="250" height="555" alt="f2c808e8-de35-413e-bca6-0748062abf1a" src="https://github.com/user-attachments/assets/6eb1e394-5711-439e-889b-7002071d7d9c" />
 
-## 9. How to Run
+- A database view showing the profiles table (for example, the Supabase table editor)
+  
+  <img width="264" height="351" alt="image" src="https://github.com/user-attachments/assets/08ff0084-e36e-4205-a1bb-f0395f79d0d6" />
+  <img width="959" height="236" alt="Screenshot 2026-09-27 155651" src="https://github.com/user-attachments/assets/a67bfc73-7fe8-4243-b18f-c1f40dee4e62" />
 
-### Prerequisites
-
-Install the following:
-
-- Node.js and npm
-- Apache Cordova
-- Android Studio
-- Android SDK
-- Java JDK
-- Android device or Android emulator
-
-### Install Dependencies
-
-Clone the project repository and open the project folder in a terminal.
-
-```bash
-git clone https://github.com/Yui089/Peregrino_StudentProfile.git
-cd Peregrino_Start
-```
-
-Install the project dependencies:
-
-```bash
-npm install
-```
-
-### Configure the Cordova Project
-
-Make sure the Android platform is installed:
-
-```bash
-cordova platform add android
-```
-
-If the Android platform is already included in the project, this step is not necessary.
-
-### Install the Camera Plugin
-
-Install the Cordova Camera Plugin:
-
-```bash
-cordova plugin add cordova-plugin-camera
-```
-
-The project uses:
-
-```text
-cordova-plugin-camera 8.0.0
-```
-
-The application also uses the Cordova File Plugin:
-
-```bash
-cordova plugin add cordova-plugin-file
-```
-
-### Build the Application
-
-Build the Android application using:
-
-```bash
-cordova build android
-```
-
-### Run the Application
-
-To run the application on a connected Android device or emulator:
-
-```bash
-cordova run android
-```
-
-The application can also be opened and built through Android Studio using the generated Android project located inside:
-
-```text
-platforms/android
-```
-
-## 10. Screenshots
-
-### Before
-
-<img width="559" height="317" alt="ef98031e-3a54-4559-a447-78f7dc9ae8f8" src="https://github.com/user-attachments/assets/ad2ace5e-707b-4b43-84ea-83f2e4b76f05" />
-
-### Camera
-
-<img width="559" height="317" alt="f65bb9d0-942c-455b-ac75-221ce96e7a63" src="https://github.com/user-attachments/assets/5d8e19bf-5285-48e4-bb48-dc2a3bed570c" />
-
-### After
-
-<img width="559" height="317" alt="091dfa07-b121-4e99-8217-e50d4e3c3730" src="https://github.com/user-attachments/assets/dc3698fc-76c7-4be6-af1b-594f00da5b88" />
